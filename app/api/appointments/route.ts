@@ -77,7 +77,9 @@ export async function GET(request: Request) {
       const session = await parseSessionCookie(cookieStore);
       if (session) isAuthenticated = true;
     }
-    
+
+    // Allow public access for tracking by tracking number
+    // Only require authentication for admin operations (not tracking)
     if (!isAuthenticated && !trackingNumber) {
       return NextResponse.json(
         { error: 'Authentication required' },

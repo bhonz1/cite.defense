@@ -219,163 +219,90 @@ export default function TrackPage() {
             </CardContent>
           </Card>
 
-          {/* Tracking Result - Professional Certificate */}
+          {/* Tracking Result - Simplified Card */}
           {trackingResult && (
-            <div className="mb-6">
-              <div className="max-w-4xl mx-auto bg-white shadow-2xl">
-                {/* Certificate Content */}
-                <div className="p-12">
-                        
-                        {/* Certificate Header */}
-                        <div className="text-center mb-8">
-                          {/* Certificate Title */}
-                          <div className="mb-6">
-                            <h1 className="text-4xl font-serif font-bold text-black mb-2 tracking-wide">
-                              REQUEST FOR DEFENSE SCHEDULE
-                            </h1>
-                            <div className="flex justify-center">
-                              <div className="h-1 w-32 bg-black"></div>
-                            </div>
-                          </div>
-                          
-                          {/* Status Badge */}
-                          <div className="flex justify-center">
-                            <div className={`px-6 py-3 rounded-full border-2 ${getStatusColor(trackingResult.status)} bg-white shadow-lg`}>
-                              <div className="flex items-center gap-2">
-                                {getStatusIcon(trackingResult.status)}
-                                <span className="font-bold text-lg">{trackingResult.status}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Certificate Body */}
-                        <div className="space-y-8">
-                          
-                          {/* Tracking Number */}
-                          <div className="text-center">
-                            <div className="inline-block bg-gray-100 border-2 border-black rounded-lg px-8 py-4">
-                              <p className="text-sm font-bold text-black uppercase tracking-wider mb-1">Tracking Number</p>
-                              <p className="text-2xl font-mono font-bold text-black">{trackingResult.tracking_number}</p>
-                            </div>
-                          </div>
-
-                          {/* Research Title */}
-                          <div className="text-center py-6 bg-gray-100 rounded-lg border-2 border-gray-800">
-                            <h2 className="text-2xl font-serif font-bold text-black leading-tight px-8">
-                              {trackingResult.research_title}
-                            </h2>
-                          </div>
-
-                          {/* Two Column Information */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* Left Column */}
-                            <div className="space-y-6">
-                              <div className="bg-white rounded-lg border-2 border-gray-800 p-4">
-                                <p className="text-xs font-bold text-black uppercase tracking-wider mb-2">Group Information</p>
-                                <div className="space-y-2">
-                                  <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="text-sm text-gray-600">Group Code:</span>
-                                    <span className="font-semibold text-black">{trackingResult.group_code}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Research Type:</span>
-                                    <span className="font-semibold text-black">{trackingResult.research_type}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Defense Type:</span>
-                                    <span className="font-semibold text-black">{trackingResult.defense_type}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="bg-white rounded-lg border-2 border-gray-800 p-4">
-                                <p className="text-xs font-bold text-black uppercase tracking-wider mb-2">Research Adviser</p>
-                                <p className="font-semibold text-black">{trackingResult.adviser_name}</p>
-                              </div>
-                            </div>
-
-                            {/* Right Column */}
-                            <div className="space-y-6">
-                              <div className="bg-white rounded-lg border-2 border-gray-800 p-4">
-                                <p className="text-xs font-bold text-black uppercase tracking-wider mb-2">Defense Schedule</p>
-                                <div className="space-y-2">
-                                  <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="text-sm text-gray-600">Date:</span>
-                                    <span className="font-semibold text-black">
-                                      {new Date(trackingResult.date).toLocaleDateString('en-US', { 
-                                        month: 'long', 
-                                        day: 'numeric', 
-                                        year: 'numeric' 
-                                      })}
-                                    </span>
-                                  </div>
-                                  <div className="flex justify-between border-b border-gray-300 pb-1">
-                                    <span className="text-sm text-gray-600">Time:</span>
-                                    <span className="font-semibold text-black">{trackingResult.time_desc}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Room:</span>
-                                    <span className="font-semibold text-black">{trackingResult.room}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                                                          </div>
-                          </div>
-
-                          {/* Team Members */}
-                          {trackingResult.students && trackingResult.students.length > 0 && (
-                            <div className="bg-white rounded-lg border-2 border-gray-800 p-6">
-                              <h3 className="text-lg font-serif font-bold text-black mb-4 text-center">Defense Team Members</h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {trackingResult.students.map((student, index) => (
-                                  <div key={index} className="bg-gray-100 rounded-lg border border-gray-800 p-3">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center">
-                                        <User className="h-5 w-5 text-white" />
-                                      </div>
-                                      <div className="flex-1">
-                                        <p className="font-semibold text-black text-sm">{student.name}</p>
-                                        <p className="text-xs text-gray-700 font-medium">{student.role}</p>
-                                        <p className="text-xs text-gray-600">{student.email}</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Certificate Footer */}
-                        <div className="mt-12 pt-8 border-t-4 border-gray-800">
-                          <div className="flex justify-center items-center">
-                            {/* Left Side - Date */}
-                            <div className="text-center">
-                              <p className="text-sm font-bold text-black uppercase tracking-wider mb-2">Date of Issue</p>
-                              <p className="font-semibold text-black">
-                                {new Date(trackingResult.created_at).toLocaleDateString('en-US', { 
-                                  month: 'long', 
-                                  day: 'numeric', 
-                                  year: 'numeric' 
-                                })}
-                              </p>
-                            </div>
-
-                            
-                                                      </div>
-
-                          {/* Bottom Text */}
-                          <div className="text-center mt-8">
-                            <p className="text-xs text-gray-700 italic">
-                              This certificate is electronically generated and serves as official documentation of the defense appointment.
-                            </p>
-                          </div>
-                        </div>
+            <Card className="border-0 shadow-lg bg-white">
+              <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-bold">Appointment Details</CardTitle>
+                  <Badge className={`bg-white text-orange-600 font-bold ${getStatusColor(trackingResult.status)}`}>
+                    {trackingResult.status}
+                  </Badge>
                 </div>
-              </div>
-            </div>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                {/* Tracking Number */}
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Tracking Number</p>
+                  <p className="text-lg font-mono font-bold text-gray-900">{trackingResult.tracking_number}</p>
+                </div>
+
+                {/* Research Title */}
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Research Title</p>
+                  <p className="text-base font-semibold text-gray-900">{trackingResult.research_title}</p>
+                </div>
+
+                {/* Grid for details */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Group Code</p>
+                    <p className="font-semibold text-gray-900">{trackingResult.group_code}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Research Type</p>
+                    <p className="font-semibold text-gray-900">{trackingResult.research_type}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Defense Type</p>
+                    <p className="font-semibold text-gray-900">{trackingResult.defense_type}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Adviser</p>
+                    <p className="font-semibold text-gray-900 text-sm">{trackingResult.adviser_name}</p>
+                  </div>
+                </div>
+
+                {/* Schedule */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Defense Schedule</p>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1">Date</p>
+                      <p className="font-semibold text-gray-900 text-sm">
+                        {new Date(trackingResult.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1">Time</p>
+                      <p className="font-semibold text-gray-900 text-sm">{trackingResult.time_desc}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 mb-1">Room</p>
+                      <p className="font-semibold text-gray-900 text-sm">{trackingResult.room}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Team Members */}
+                {trackingResult.students && trackingResult.students.length > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Team Members</p>
+                    <div className="space-y-2">
+                      {trackingResult.students.map((student, index) => (
+                        <div key={index} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                          <User className="h-5 w-5 text-gray-600" />
+                          <div className="flex-1">
+                            <p className="font-semibold text-gray-900 text-sm">{student.name}</p>
+                            <p className="text-xs text-gray-600">{student.role} • {student.email}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )}
         </div>
       </main>
