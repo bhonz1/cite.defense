@@ -62,29 +62,31 @@ export async function GET(request: Request) {
     const studentName = searchParams.get('studentName');
     const trackingNumber = searchParams.get('trackingNumber');
 
-    // Get user from session to check auth (skip for tracking requests)
-    let isAuthenticated = false;
-    
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) isAuthenticated = true;
-    } catch (authError) {
-      console.error('Supabase auth error:', authError);
-    }
-    
-    // Fallback: Check custom session cookie
-    if (!isAuthenticated) {
-      const session = await parseSessionCookie(cookieStore);
-      if (session) isAuthenticated = true;
-    }
-
     // Allow public access for tracking by tracking number
     // Only require authentication for admin operations (not tracking)
-    if (!isAuthenticated && !trackingNumber) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+    if (!trackingNumber) {
+      // Get user from session to check auth
+      let isAuthenticated = false;
+
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) isAuthenticated = true;
+      } catch (authError) {
+        console.error('Supabase auth error:', authError);
+      }
+
+      // Fallback: Check custom session cookie
+      if (!isAuthenticated) {
+        const session = await parseSessionCookie(cookieStore);
+        if (session) isAuthenticated = true;
+      }
+
+      if (!isAuthenticated) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
     }
 
     let query = supabase
