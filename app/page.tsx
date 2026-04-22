@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronRight, GraduationCap, CalendarDays, Calendar, Clock, MapPin, Users, FileText, AlertCircle, CheckCircle, XCircle, TrendingUp, Building, Loader2 } from "lucide-react";
+import { createClient } from '@/utils/supabase/client';
 
 interface Appointment {
   id: string;
@@ -109,12 +110,31 @@ export default function LandingPage() {
   const [researchFilter, setResearchFilter] = useState<'ALL' | 'THESIS' | 'CAPSTONE'>('ALL');
 
   useEffect(() => {
+    const supabase = createClient();
+
+    // Initial fetch
     fetchAppointments();
-    
-    // Set up real-time refresh every 30 seconds
-    const interval = setInterval(fetchAppointments, 30000);
-    
-    return () => clearInterval(interval);
+
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('appointments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments'
+        },
+        (payload) => {
+          console.log('Real-time change received:', payload);
+          fetchAppointments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchAppointments = async () => {
@@ -124,7 +144,7 @@ export default function LandingPage() {
         fetch('/api/appointments?status=APPROVED'),
         fetch('/api/appointments?status=PENDING')
       ]);
-      
+
       if (approvedRes.ok && pendingRes.ok) {
         const approvedData = await approvedRes.json();
         const pendingData = await pendingRes.json();

@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { GraduationCap, Loader2, Calendar as CalendarIcon, Check, X, Search, Filter, BarChart3, Clock, Users, CheckCircle, Eye, FileText, CalendarDays, MapPin, AlertCircle, ChevronDown, ChevronUp, MoreHorizontal, Shield, BookOpen, Award, LogOut, User } from "lucide-react";
 import { getAppointments, updateAppointment, getDashboardStats, getAvailableSlots } from "@/lib/api";
 import { toast } from "sonner";
+import { createClient } from '@/utils/supabase/client';
 
 const acadYears = ["All", "2024-2025", "2025-2026"];
 const researchTypes = ["All", "CAPSTONE", "THESIS"];
@@ -202,6 +203,34 @@ export default function AdminDashboard() {
       fetchData();
     }
   }, [user, filters]);
+
+  // Set up real-time subscription for appointments
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel('admin-appointments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments'
+        },
+        (payload) => {
+          console.log('Admin real-time change received:', payload);
+          if (user?.user_metadata?.role === "ADMIN") {
+            fetchData();
+            getDashboardStats("");
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   useEffect(() => {
     if (activeTab === 'users' && user?.user_metadata?.role === "ADMIN") {
