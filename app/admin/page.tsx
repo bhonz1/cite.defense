@@ -179,6 +179,19 @@ export default function AdminDashboard() {
     completed: false,
     notApproved: false,
   });
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+  const toggleRow = (id: string) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -836,6 +849,7 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader className="bg-gradient-to-r from-orange-50 to-red-50 border-b-2 border-orange-200">
                     <TableRow className="hover:bg-orange-100/50">
+                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 w-10"></TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Appointment Code</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px] max-w-[250px]">Research Title</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px]">Team Members</TableHead>
@@ -850,7 +864,7 @@ export default function AdminDashboard() {
                   <TableBody>
                     {filteredAppointments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center py-16">
+                        <TableCell colSpan={10} className="text-center py-16">
                           <div className="flex flex-col items-center gap-4">
                             <div className="p-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full">
                               <FileText className="h-10 w-10 text-orange-500" />
@@ -862,10 +876,23 @@ export default function AdminDashboard() {
                       </TableRow>
                     ) : (
                       filteredAppointments.map((appointment, index) => (
+                        <>
                         <TableRow
                           key={appointment.id}
                           className="hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-red-50/80 transition-all duration-300 border-b border-gray-100 last:border-0"
                         >
+                          <TableCell className="py-5 px-4">
+                            <button
+                              onClick={() => toggleRow(appointment.id)}
+                              className="p-1 hover:bg-gray-100 rounded transition-colors"
+                            >
+                              {expandedRows.has(appointment.id) ? (
+                                <ChevronUp className="h-4 w-4 text-gray-600" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4 text-gray-600" />
+                              )}
+                            </button>
+                          </TableCell>
                           <TableCell className="py-5 px-4">
                             <div className="font-mono font-bold text-xs text-gray-900 bg-gray-100 px-2 py-1 rounded">
                               {appointment.appointment_code}
@@ -873,7 +900,7 @@ export default function AdminDashboard() {
                           </TableCell>
                           <TableCell className="py-5 px-4">
                             <div className="space-y-2">
-                              <div className="font-bold text-gray-900 text-sm leading-tight line-clamp-3">{appointment.research_title}</div>
+                              <div className="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{appointment.research_title}</div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-gray-500 font-medium">{appointment.acad_year}</span>
                                 <span className="text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white px-2.5 py-1 rounded-full font-semibold shadow-sm">
@@ -883,16 +910,8 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell className="py-5 px-4">
-                            <div className="space-y-2">
-                              {appointment.students?.map((student, idx) => (
-                                <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-2.5 border border-gray-200 shadow-sm">
-                                  <div className="font-semibold text-gray-900 text-sm">{student.name}</div>
-                                  <div className="text-xs text-gray-600 mt-1 font-medium">{student.student_id} • {student.course_section}</div>
-                                  <Badge variant="outline" className="text-xs mt-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200 font-semibold">
-                                    {student.role}
-                                  </Badge>
-                                </div>
-                              ))}
+                            <div className="text-xs text-gray-600">
+                              {appointment.students?.length} member{appointment.students?.length !== 1 ? 's' : ''}
                             </div>
                           </TableCell>
                           <TableCell className="py-5 px-4">
@@ -920,40 +939,6 @@ export default function AdminDashboard() {
                               <MapPin className="h-4 w-4 text-blue-600" />
                               <span className="text-sm font-bold text-blue-900">{appointment.room}</span>
                             </div>
-                          </TableCell>
-                          <TableCell className="py-5 px-4">
-                            {appointment.status === "APPROVED" && appointment.group_code && appointmentsPanelists[appointment.group_code] ? (
-                              <div className="space-y-2">
-                                {appointmentsPanelists[appointment.group_code].map((panelist: any) => (
-                                  <div key={panelist.id} className="flex items-center gap-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg px-2.5 py-2 border border-gray-200 shadow-sm">
-                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                                      panelist.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-100 to-orange-200' : 'bg-gradient-to-br from-blue-100 to-blue-200'
-                                    }`}>
-                                      {panelist.role === 'CHAIRMAN' ? (
-                                        <Shield className="h-3.5 w-3.5 text-orange-600" />
-                                      ) : (
-                                        <User className="h-3.5 w-3.5 text-blue-600" />
-                                      )}
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="font-semibold text-gray-900 text-xs">{panelist.name}</div>
-                                      <Badge variant="outline" className={`text-xs px-1.5 py-0.5 font-semibold ${
-                                        panelist.role === 'CHAIRMAN'
-                                          ? 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-700 border-orange-300'
-                                          : 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 border-blue-300'
-                                      }`}>
-                                        {panelist.role}
-                                      </Badge>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
-                                <Users className="h-4 w-4" />
-                                <span>Not assigned</span>
-                              </div>
-                            )}
                           </TableCell>
                           <TableCell className="py-5 px-4">
                             <Badge className={`font-bold px-3 py-1.5 text-xs ${getStatusColor(appointment.status)}`} variant="outline">
@@ -1236,6 +1221,67 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                         </TableRow>
+                        {/* Expandable Row */}
+                        {expandedRows.has(appointment.id) && (
+                          <TableRow>
+                            <TableCell colSpan={10} className="py-4 px-4 bg-gray-50">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Team Members */}
+                                <div>
+                                  <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Team Members</p>
+                                  <div className="space-y-2">
+                                    {appointment.students?.map((student, idx) => (
+                                      <div key={idx} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
+                                        <div className="font-semibold text-gray-900 text-sm">{student.name}</div>
+                                        <div className="text-xs text-gray-600 mt-1">{student.student_id} • {student.course_section}</div>
+                                        <Badge variant="outline" className="text-xs mt-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200 font-semibold">
+                                          {student.role}
+                                        </Badge>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                {/* Panelists */}
+                                <div>
+                                  <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Panelists</p>
+                                  {appointment.status === "APPROVED" && appointment.group_code && appointmentsPanelists[appointment.group_code] ? (
+                                    <div className="space-y-2">
+                                      {appointmentsPanelists[appointment.group_code].map((panelist: any) => (
+                                        <div key={panelist.id} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-gray-200 shadow-sm">
+                                          <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                                            panelist.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-100 to-orange-200' : 'bg-gradient-to-br from-blue-100 to-blue-200'
+                                          }`}>
+                                            {panelist.role === 'CHAIRMAN' ? (
+                                              <Shield className="h-3.5 w-3.5 text-orange-600" />
+                                            ) : (
+                                              <User className="h-3.5 w-3.5 text-blue-600" />
+                                            )}
+                                          </div>
+                                          <div className="flex-1">
+                                            <div className="font-semibold text-gray-900 text-xs">{panelist.name}</div>
+                                            <Badge variant="outline" className={`text-xs px-1.5 py-0.5 font-semibold ${
+                                              panelist.role === 'CHAIRMAN'
+                                                ? 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-700 border-orange-300'
+                                                : 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 border-blue-300'
+                                            }`}>
+                                              {panelist.role}
+                                            </Badge>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2 text-gray-400 text-sm">
+                                      <Users className="h-4 w-4" />
+                                      <span>Not assigned</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                        </>
                       ))
                     )}
                   </TableBody>
