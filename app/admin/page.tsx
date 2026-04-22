@@ -866,7 +866,7 @@ export default function AdminDashboard() {
                         >
                           <TableCell className="py-5 px-4">
                             <div className="space-y-2">
-                              <div className="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{appointment.research_title}</div>
+                              <div className="font-bold text-gray-900 text-sm leading-tight break-words">{appointment.research_title}</div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-gray-500 font-medium">{appointment.acad_year}</span>
                                 <span className="text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white px-2.5 py-1 rounded-full font-semibold shadow-sm">
