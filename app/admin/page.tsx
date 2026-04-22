@@ -851,11 +851,9 @@ export default function AdminDashboard() {
                     <TableRow className="hover:bg-orange-100/50">
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 w-10"></TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Appointment Code</TableHead>
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px] max-w-[250px]">Research Title</TableHead>
+                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[250px] max-w-[350px]">Research Title</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px]">Team Members</TableHead>
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Type</TableHead>
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[140px]">Date & Time</TableHead>
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[100px]">Room</TableHead>
+                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Research Type</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[160px]">Panelists</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[100px]">Status</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Actions</TableHead>
@@ -864,7 +862,7 @@ export default function AdminDashboard() {
                   <TableBody>
                     {filteredAppointments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={10} className="text-center py-16">
+                        <TableCell colSpan={8} className="text-center py-16">
                           <div className="flex flex-col items-center gap-4">
                             <div className="p-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full">
                               <FileText className="h-10 w-10 text-orange-500" />
@@ -907,6 +905,23 @@ export default function AdminDashboard() {
                                   {appointment.group_code}
                                 </span>
                               </div>
+                              <div className="flex items-center gap-2 flex-wrap text-xs">
+                                <Badge variant="outline" className="bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-purple-200 font-semibold">
+                                  {appointment.defense_type}
+                                </Badge>
+                                <span className="text-gray-600 flex items-center gap-1">
+                                  <CalendarIcon className="h-3 w-3 text-orange-500" />
+                                  {format(new Date(appointment.date), "PP")}
+                                </span>
+                                <span className="text-gray-600 flex items-center gap-1">
+                                  <Clock className="h-3 w-3 text-orange-400" />
+                                  {appointment.time_desc}
+                                </span>
+                                <span className="text-gray-600 flex items-center gap-1">
+                                  <MapPin className="h-3 w-3 text-blue-600" />
+                                  {appointment.room}
+                                </span>
+                              </div>
                             </div>
                           </TableCell>
                           <TableCell className="py-5 px-4">
@@ -915,30 +930,7 @@ export default function AdminDashboard() {
                             </div>
                           </TableCell>
                           <TableCell className="py-5 px-4">
-                            <div className="space-y-2">
-                              <div className="text-sm font-bold text-gray-900">{appointment.research_type}</div>
-                              <Badge variant="outline" className="text-xs bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border-purple-200 font-semibold">
-                                {appointment.defense_type}
-                              </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-5 px-4">
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-sm font-bold text-gray-900">
-                                <CalendarIcon className="h-4 w-4 text-orange-500" />
-                                {format(new Date(appointment.date), "PP")}
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-gray-600 font-medium">
-                                <Clock className="h-3 w-3 text-orange-400" />
-                                {appointment.time_desc}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-5 px-4">
-                            <div className="flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg px-3 py-2.5 border border-blue-200 shadow-sm">
-                              <MapPin className="h-4 w-4 text-blue-600" />
-                              <span className="text-sm font-bold text-blue-900">{appointment.room}</span>
-                            </div>
+                            <div className="text-sm font-bold text-gray-900">{appointment.research_type}</div>
                           </TableCell>
                           <TableCell className="py-5 px-4">
                             <Badge className={`font-bold px-3 py-1.5 text-xs ${getStatusColor(appointment.status)}`} variant="outline">
@@ -1224,7 +1216,7 @@ export default function AdminDashboard() {
                         {/* Expandable Row */}
                         {expandedRows.has(appointment.id) && (
                           <TableRow>
-                            <TableCell colSpan={10} className="py-4 px-4 bg-gray-50">
+                            <TableCell colSpan={8} className="py-4 px-4 bg-gray-50">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Team Members */}
                                 <div>
