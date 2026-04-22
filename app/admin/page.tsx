@@ -106,6 +106,7 @@ function AdminNavigation({ user, onSignOut, activeTab, setActiveTab, stats }: {
 interface Appointment {
   id: string;
   tracking_number: string;
+  appointment_code: string;
   research_title: string;
   group_code: string;
   student_name: string;
@@ -835,6 +836,7 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader className="bg-gradient-to-r from-orange-50 to-red-50 border-b-2 border-orange-200">
                     <TableRow className="hover:bg-orange-100/50">
+                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Appointment Code</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px] max-w-[250px]">Research Title</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px]">Team Members</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Type</TableHead>
@@ -848,7 +850,7 @@ export default function AdminDashboard() {
                   <TableBody>
                     {filteredAppointments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-16">
+                        <TableCell colSpan={9} className="text-center py-16">
                           <div className="flex flex-col items-center gap-4">
                             <div className="p-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full">
                               <FileText className="h-10 w-10 text-orange-500" />
@@ -865,8 +867,13 @@ export default function AdminDashboard() {
                           className="hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-red-50/80 transition-all duration-300 border-b border-gray-100 last:border-0"
                         >
                           <TableCell className="py-5 px-4">
+                            <div className="font-mono font-bold text-xs text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                              {appointment.appointment_code}
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-5 px-4">
                             <div className="space-y-2">
-                              <div className="font-bold text-gray-900 text-sm leading-tight break-words">{appointment.research_title}</div>
+                              <div className="font-bold text-gray-900 text-sm leading-tight line-clamp-3">{appointment.research_title}</div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-gray-500 font-medium">{appointment.acad_year}</span>
                                 <span className="text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white px-2.5 py-1 rounded-full font-semibold shadow-sm">
