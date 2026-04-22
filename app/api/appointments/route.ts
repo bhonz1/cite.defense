@@ -85,11 +85,14 @@ export async function GET(request: Request) {
       }
 
       if (!isAuthenticated) {
+        console.log('Authentication failed, returning 401');
         return NextResponse.json(
           { error: 'Authentication required' },
           { status: 401 }
         );
       }
+    } else {
+      console.log('Tracking number present, skipping authentication check');
     }
 
     let query = supabase
