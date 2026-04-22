@@ -852,9 +852,6 @@ export default function AdminDashboard() {
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 w-10"></TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Appointment Code</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[250px] max-w-[350px]">Research Title</TableHead>
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px]">Team Members</TableHead>
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Research Type</TableHead>
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[160px]">Panelists</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[100px]">Status</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Actions</TableHead>
                     </TableRow>
@@ -862,7 +859,7 @@ export default function AdminDashboard() {
                   <TableBody>
                     {filteredAppointments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={8} className="text-center py-16">
+                        <TableCell colSpan={5} className="text-center py-16">
                           <div className="flex flex-col items-center gap-4">
                             <div className="p-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full">
                               <FileText className="h-10 w-10 text-orange-500" />
@@ -923,14 +920,6 @@ export default function AdminDashboard() {
                                 </span>
                               </div>
                             </div>
-                          </TableCell>
-                          <TableCell className="py-5 px-4">
-                            <div className="text-xs text-gray-600">
-                              {appointment.students?.length} member{appointment.students?.length !== 1 ? 's' : ''}
-                            </div>
-                          </TableCell>
-                          <TableCell className="py-5 px-4">
-                            <div className="text-sm font-bold text-gray-900">{appointment.research_type}</div>
                           </TableCell>
                           <TableCell className="py-5 px-4">
                             <Badge className={`font-bold px-3 py-1.5 text-xs ${getStatusColor(appointment.status)}`} variant="outline">
@@ -1216,7 +1205,7 @@ export default function AdminDashboard() {
                         {/* Expandable Row */}
                         {expandedRows.has(appointment.id) && (
                           <TableRow>
-                            <TableCell colSpan={8} className="py-4 px-4 bg-gray-50">
+                            <TableCell colSpan={5} className="py-4 px-4 bg-gray-50">
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Team Members */}
                                 <div>
