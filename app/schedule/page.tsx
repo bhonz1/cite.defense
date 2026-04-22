@@ -291,20 +291,26 @@ export default function SchedulePage() {
       
       const appointmentData = {
         trackingNumber: trackingNum,
-        researchTitle: researchTitle.toUpperCase(),
         groupCode: groupCode.toUpperCase(),
-        roomName: selectedRoom,
         researchType: selectedResearchType,
         defenseType: selectedDefenseType,
+        researchTitle: researchTitle.toUpperCase(),
         adviserName: adviserName.toUpperCase(),
         acadYear: new Date(selectedDate).getFullYear().toString(), // Extract year from selected date
         dateTime: dateTime.toISOString(),
+        timeDesc: selectedTime,
         students: teamMembers.filter(member => member.name.trim()).map(member => ({
             student_id: member.studentId.toUpperCase(),
             name: member.name.toUpperCase(),
-            role: member.role,
-            course_section: member.courseSection.toUpperCase()
-          }))
+            course_section: member.courseSection.toUpperCase(),
+            role: member.role
+        })),
+        members: teamMembers.filter(member => member.name.trim()).map(member => ({
+            student_id: member.studentId.toUpperCase(),
+            name: member.name.toUpperCase(),
+            course_section: member.courseSection.toUpperCase(),
+            role: member.role
+        }))
       };
 
       console.log('Submitting appointment data:', appointmentData);

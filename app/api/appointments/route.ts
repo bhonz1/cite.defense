@@ -144,6 +144,7 @@ export async function POST(request: Request) {
       defenseType,
       researchTitle,
       dateTime,
+      timeDesc,
       adviserName,
       groupCode,
       roomName,
@@ -179,18 +180,21 @@ export async function POST(request: Request) {
     // Parse date and time from dateTime string
     const dt = new Date(dateTime);
     const dateStr = dt.toISOString().split('T')[0];
-    const hour = dt.getHours();
 
-    // Get time slot configuration for given hour
-    const timeDescMap: { [key: number]: string } = {
-      8: '08:00 AM - 10:00 AM', 
-      10: '10:00 AM - 12:00 PM', 
-      13: '01:00 PM - 03:00 PM', 
-      15: '03:00 PM - 05:00 PM'
-    };
-    const timeDesc = timeDescMap[hour];
+    // Use timeDesc from body if provided, otherwise calculate from hour
+    let finalTimeDesc = timeDesc;
+    if (!finalTimeDesc) {
+      const hour = dt.getHours();
+      const timeDescMap: { [key: number]: string } = {
+        8: '08:00 AM - 10:00 AM',
+        10: '10:00 AM - 12:00 PM',
+        13: '01:00 PM - 03:00 PM',
+        15: '03:00 PM - 05:00 PM'
+      };
+      finalTimeDesc = timeDescMap[hour];
+    }
 
-    if (!timeDesc) {
+    if (!finalTimeDesc) {
       return NextResponse.json(
         { error: 'Invalid time slot' },
         { status: 400 }
@@ -198,7 +202,7 @@ export async function POST(request: Request) {
     }
 
     // Check for conflicts
-    const hasConflict = await checkConflicts(supabase, dateStr, timeDesc, roomName);
+    const hasConflict = await checkConflicts(supabase, dateStr, finalTimeDesc, roomName);
     if (hasConflict) {
       return NextResponse.json(
         { error: 'This time slot is already booked for this room' },
@@ -216,7 +220,7 @@ export async function POST(request: Request) {
       defense_type: defenseType,
       research_title: researchTitle,
       date: dateStr,
-      time_desc: timeDesc,
+      time_desc: finalTimeDesc,
       room: roomName,
       status: 'PENDING',
       adviser_name: adviserName,
