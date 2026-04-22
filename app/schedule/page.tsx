@@ -299,6 +299,7 @@ export default function SchedulePage() {
         acadYear: new Date(selectedDate).getFullYear().toString(), // Extract year from selected date
         dateTime: dateTime.toISOString(),
         timeDesc: selectedTime,
+        roomName: selectedRoom,
         students: teamMembers.filter(member => member.name.trim()).map(member => ({
             student_id: member.studentId.toUpperCase(),
             name: member.name.toUpperCase(),
