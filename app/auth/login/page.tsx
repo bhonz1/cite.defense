@@ -34,7 +34,7 @@ export default function LoginPage() {
       } else {
         toast.success("Login successful!");
         // Redirect based on role
-        const targetPath = (data.user?.role === "ADMIN" || data.user?.role === "SUPERADMIN") ? "/admin" : "/student";
+        const targetPath = (data.user?.role === "ADMIN" || data.user?.role === "SUPERADMIN") ? "/admin" : data.user?.role === "PANEL" ? "/panel" : "/student";
 
         // Use router.push with await for proper navigation
         await router.push(targetPath);

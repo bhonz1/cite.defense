@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -196,6 +196,8 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/auth/login");
+    } else if (!authLoading && user?.user_metadata?.role === "PANEL") {
+      router.push("/panel");
     } else if (!authLoading && user?.user_metadata?.role !== "ADMIN" && user?.user_metadata?.role !== "SUPERADMIN") {
       router.push("/student");
     }
@@ -871,9 +873,8 @@ export default function AdminDashboard() {
                       </TableRow>
                     ) : (
                       filteredAppointments.map((appointment, index) => (
-                        <>
+                        <React.Fragment key={appointment.id}>
                         <TableRow
-                          key={appointment.id}
                           className="hover:bg-gradient-to-r hover:from-orange-50/80 hover:to-red-50/80 transition-all duration-300 border-b border-gray-100 last:border-0"
                         >
                           <TableCell className="py-5 px-4">
@@ -1262,7 +1263,7 @@ export default function AdminDashboard() {
                             </TableCell>
                           </TableRow>
                         )}
-                        </>
+                        </React.Fragment>
                       ))
                     )}
                   </TableBody>

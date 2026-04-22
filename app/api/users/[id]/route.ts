@@ -39,12 +39,36 @@ export async function PUT(
       );
     }
 
-    // Note: Without service role key, we can't use admin.updateUserById
-    // This is a limitation - we would need service role key for full user management
-    return NextResponse.json(
-      { error: 'Service role key required for user updates' },
-      { status: 501 }
-    );
+    const body = await request.json();
+    const { username, fullname, role, password } = body;
+
+    // Update user in the custom users table
+    const updateData: any = {
+      username,
+      fullname,
+      role,
+    };
+
+    if (password) {
+      updateData.password = password;
+    }
+
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Update user error:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update user', details: updateError.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(updatedUser);
 
   } catch (error) {
     console.error('Users API error:', error);
