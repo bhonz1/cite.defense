@@ -123,9 +123,12 @@ export default function TrackPage() {
           setTrackingError("No appointment found with this tracking number");
         }
       } else {
-        setTrackingError("Failed to fetch appointment details");
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Track error:', errorData);
+        setTrackingError(errorData.error || "Failed to fetch appointment details");
       }
     } catch (error) {
+      console.error('Track fetch error:', error);
       setTrackingError("Error fetching appointment details");
     } finally {
       setIsTracking(false);
