@@ -67,10 +67,13 @@ export default function PanelDashboard() {
       acc[key] = value;
       return acc;
     }, {});
+    console.log('All cookies:', cookies);
     const sessionCookie = cookies['session'];
+    console.log('Session cookie value:', sessionCookie);
     if (sessionCookie) {
       try {
         const sessionData = JSON.parse(Buffer.from(sessionCookie, 'base64').toString());
+        console.log('Parsed session data:', sessionData);
         return sessionData;
       } catch (error) {
         console.error('Error parsing session cookie:', error);
@@ -84,14 +87,18 @@ export default function PanelDashboard() {
     const checkAuth = async () => {
       try {
         const session = parseSessionCookie();
+        console.log('Panel session:', session);
         if (!session) {
+          console.log('No session found, redirecting to login');
           router.push("/auth/login");
           return;
         }
         if (session.role !== "PANEL") {
+          console.log('Invalid role:', session.role, 'redirecting to student');
           router.push("/student");
           return;
         }
+        console.log('Session valid, setting user');
         setUser(session);
         fetchAssignedAppointments(session.name || session.username || "");
       } catch (error) {
@@ -102,7 +109,8 @@ export default function PanelDashboard() {
       }
     };
     checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchAssignedAppointments = async (panelistName: string) => {
     try {
