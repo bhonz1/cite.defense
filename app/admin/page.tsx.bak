@@ -1,0 +1,598 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/providers/AuthProvider";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { GraduationCap, Loader2, Calendar as CalendarIcon, Check, X, Search, Filter, BarChart3, Clock, Users, CheckCircle, Eye, FileText, CalendarDays, MapPin, AlertCircle, ChevronDown, ChevronUp, MoreHorizontal, Shield, BookOpen, Award } from "lucide-react";
+import { getAppointments, updateAppointment, getDashboardStats, getAvailableSlots } from "@/lib/api";
+import { toast } from "sonner";
+import AdminNavigation from "@/components/AdminNavigation";
+
+const acadYears = ["All", "2024-2025", "2025-2026"];
+const researchTypes = ["All", "CAPSTONE", "THESIS"];
+const defenseTypes = ["All", "PROPOSAL", "FINAL"];
+const statuses = ["All", "PENDING", "APPROVED", "NOT APPROVED", "COMPLETED"];
+
+interface Appointment {
+  id: string;
+  acad_year: string;
+  research_type: string;
+  defense_type: string;
+  research_title: string;
+  date: string;
+  time_desc?: string;
+  status: string;
+  student_name: string;
+  student_email: string;
+  adviser_name: string;
+  group_code: string;
+  room: string;
+  tracking_number: string;
+  appointment_code: string;
+  students?: { name: string; email: string; student_id?: string; role?: string }[];
+}
+
+interface Stats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+  completed: number;
+}
+
+export default function AdminDashboard() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    acadYear: "All",
+    researchType: "All",
+    defenseType: "All",
+    status: "All",
+  });
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(undefined);
+  const [rescheduleTime, setRescheduleTime] = useState("");
+  const [availableSlots, setAvailableSlots] = useState<{ hour: number; time: string; endTime?: string; code?: string; display?: string }[]>([]);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "list">("dashboard");
+  const [expandedSections, setExpandedSections] = useState({
+    pending: true,
+    approved: true,
+    completed: false,
+    notApproved: false,
+  });
+  const [selectedView, setSelectedView] = useState<"all" | "pending" | "approved" | "not-approved" | "completed">("all");
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/auth/login");
+    } else if (!authLoading && user?.user_metadata?.role !== "ADMIN") {
+      router.push("/student");
+    }
+  }, [authLoading, user, router]);
+
+  useEffect(() => {
+    // Handle hash navigation for views
+    const hash = window.location.hash;
+    if (hash === "#list") {
+      setActiveTab("list");
+      setFilters({...filters, status: 'PENDING'});
+    } else {
+      setActiveTab("dashboard");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user?.user_metadata?.role === "ADMIN") {
+      fetchData();
+    }
+  }, [user, filters]);
+
+  useEffect(() => {
+    if (rescheduleDate && user) {
+      fetchAvailableSlots(rescheduleDate);
+    }
+  }, [rescheduleDate, user]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const params: Record<string, string> = {};
+      if (filters.acadYear !== "All") params.acadYear = filters.acadYear;
+      if (filters.researchType !== "All") params.researchType = filters.researchType;
+      if (filters.defenseType !== "All") params.defenseType = filters.defenseType;
+      if (filters.status !== "All") params.status = filters.status;
+
+      const [appointmentsData, statsData] = await Promise.all([
+        getAppointments("", params),
+        getDashboardStats(""),
+      ]);
+
+      setAppointments(appointmentsData);
+      setStats(statsData);
+    } catch (error) {
+      toast.error("Failed to fetch data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchAvailableSlots = async (date: Date) => {
+    try {
+      const dateStr = format(date, "yyyy-MM-dd");
+      const data = await getAvailableSlots("", dateStr);
+      setAvailableSlots(data);
+    } catch (error) {
+      setAvailableSlots([]);
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      await updateAppointment("", id, { status });
+      toast.success(`Appointment ${status.toLowerCase()} successfully`);
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to update appointment");
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!selectedAppointment || !rescheduleDate || !rescheduleTime) return;
+
+    try {
+      const dateTime = new Date(rescheduleDate);
+      const [hours] = rescheduleTime.split(":");
+      dateTime.setHours(parseInt(hours), 0, 0, 0);
+
+      await updateAppointment("", selectedAppointment.id, {
+        status: "APPROVED",
+        dateTime: dateTime.toISOString(),
+      });
+      toast.success("Appointment rescheduled and approved");
+      setSelectedAppointment(null);
+      setRescheduleDate(undefined);
+      setRescheduleTime("");
+      fetchData();
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to reschedule";
+      toast.error(message);
+    }
+  };
+
+  const filteredAppointments = appointments.filter((apt) => {
+    const matchesSearch = 
+      apt.research_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      apt.student_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      apt.students?.[0]?.student_id?.toLowerCase() || ''.includes(searchTerm.toLowerCase());
+    
+    const matchesFilters = 
+      (filters.status === "All" || apt.status === filters.status) &&
+      (filters.acadYear === "All" || apt.acad_year === filters.acadYear) &&
+      (filters.researchType === "All" || apt.research_type === filters.researchType) &&
+      (filters.defenseType === "All" || apt.defense_type === filters.defenseType);
+    
+    return matchesSearch && matchesFilters;
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "APPROVED": return "bg-green-100 text-green-800 border-green-200";
+      case "NOT APPROVED": return "bg-red-100 text-red-800 border-red-200";
+      case "COMPLETED": return "bg-blue-100 text-blue-800 border-blue-200";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <AdminNavigation user={user} onSignOut={() => router.push("/auth/login")} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Dashboard Header */}
+        <div className="mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Defense Administration Dashboard</h1>
+            <p className="text-gray-600">Monitor defense schedules and manage approvals</p>
+          </div>
+        </div>
+
+        {/* Enhanced Stats Cards with Quick Actions */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <Card 
+              className={`border-gray-200 cursor-pointer transition-all hover:shadow-md ${selectedView === 'all' ? 'ring-2 ring-orange-500' : ''}`}
+              onClick={() => { setSelectedView('all'); setFilters({...filters, status: 'All'}); }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Total Defenses</p>
+                    <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-gray-100 text-gray-800">
+                    <BarChart3 className="h-5 w-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card 
+              className={`border-gray-200 cursor-pointer transition-all hover:shadow-md ${selectedView === 'pending' ? 'ring-2 ring-yellow-500' : ''}`}
+              onClick={() => { setSelectedView('pending'); setFilters({...filters, status: 'PENDING'}); }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Pending Review</p>
+                    <p className="text-2xl font-bold text-yellow-700">{stats.pending}</p>
+                    {stats.pending > 0 && (
+                      <p className="text-xs text-yellow-600 mt-1">Needs approval</p>
+                    )}
+                  </div>
+                  <div className="p-2 rounded-lg bg-yellow-100 text-yellow-800">
+                    <AlertCircle className="h-5 w-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card 
+              className={`border-gray-200 cursor-pointer transition-all hover:shadow-md ${selectedView === 'approved' ? 'ring-2 ring-green-500' : ''}`}
+              onClick={() => { setSelectedView('approved'); setFilters({...filters, status: 'APPROVED'}); }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Approved</p>
+                    <p className="text-2xl font-bold text-green-700">{stats.approved}</p>
+                    <p className="text-xs text-green-600 mt-1">Scheduled</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-green-100 text-green-800">
+                    <Check className="h-5 w-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card 
+              className={`border-gray-200 cursor-pointer transition-all hover:shadow-md ${selectedView === 'not-approved' ? 'ring-2 ring-red-500' : ''}`}
+              onClick={() => { setSelectedView('not-approved'); setFilters({...filters, status: 'NOT APPROVED'}); }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Not Approved</p>
+                    <p className="text-2xl font-bold text-red-700">{stats.rejected}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-red-100 text-red-800">
+                    <X className="h-5 w-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card 
+              className={`border-gray-200 cursor-pointer transition-all hover:shadow-md ${selectedView === 'completed' ? 'ring-2 ring-blue-500' : ''}`}
+              onClick={() => { setSelectedView('completed'); setFilters({...filters, status: 'COMPLETED'}); }}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Completed</p>
+                    <p className="text-2xl font-bold text-blue-700">{stats.completed}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-blue-100 text-blue-800">
+                    <Award className="h-5 w-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Filters */}
+        <Card className="mb-6 border-gray-200">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by title, student name, or ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-gray-300"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Select
+                  value={filters.acadYear}
+                  onValueChange={(value) => setFilters({ ...filters, acadYear: value || "All" })}
+                >
+                  <SelectTrigger className="w-32">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {acadYears.map((year) => (
+                      <SelectItem key={year} value={year}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={filters.researchType}
+                  onValueChange={(value) => setFilters({ ...filters, researchType: value || "All" })}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {researchTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={filters.defenseType}
+                  onValueChange={(value) => setFilters({ ...filters, defenseType: value || "All" })}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Defense" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {defenseTypes.map((type) => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={filters.status}
+                  onValueChange={(value) => setFilters({ ...filters, status: value || "All" })}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statuses.map((status) => (
+                      <SelectItem key={status} value={status}>{status}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+                    {appointments
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .slice(0, 5)
+                      .map(appointment => (
+                        <div key={appointment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                              appointment.status === 'PENDING' ? 'bg-yellow-500' :
+                              appointment.status === 'APPROVED' ? 'bg-green-500' :
+                              appointment.status === 'NOT APPROVED' ? 'bg-red-500' :
+                              'bg-blue-500'
+                            }`} />
+                            <div>
+                              <p className="font-medium text-gray-900">{appointment.research_title}</p>
+                              <p className="text-sm text-gray-500">{appointment.student_name} • {appointment.research_type}</p>
+                            </div>
+                          </div>
+                          <Badge className={getStatusColor(appointment.status)} variant="outline">
+                            {appointment.status}
+                          </Badge>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* List View */}
+        {activeTab === "list" && (
+          <Card className="border-gray-200">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-orange-500" />
+                Defense Schedule List
+              </CardTitle>
+              <div className="flex gap-2">
+                {selectedView !== 'all' && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => { setSelectedView('all'); setFilters({...filters, status: 'All'}); }}
+                  >
+                    Clear Filter
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Research Title</TableHead>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAppointments.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                        No appointments found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredAppointments.map((appointment) => (
+                      <TableRow key={appointment.id}>
+                        <TableCell>
+                          <div className="font-medium text-gray-900">{appointment.research_title}</div>
+                          <div className="text-sm text-gray-500">{appointment.acad_year}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium text-gray-900">{appointment.student_name}</div>
+                          <div className="text-sm text-gray-500">{appointment.students?.[0]?.student_id}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">{appointment.research_type}</div>
+                          <div className="text-xs text-gray-500">{appointment.defense_type}</div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">{format(new Date(appointment.date), "PP")}</div>
+                          <div className="text-xs text-gray-500">{format(new Date(appointment.date), "p")}</div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getStatusColor(appointment.status)} variant="outline">
+                            {appointment.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {appointment.status === "PENDING" && (
+                            <div className="flex gap-2">
+                              <Dialog>
+                                <DialogTrigger>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="text-green-600 border-green-200 hover:bg-green-50"
+                                    onClick={() => setSelectedAppointment(appointment)}
+                                  >
+                                    <Check className="h-4 w-4 mr-1" /> Approve
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Approve & Schedule</DialogTitle>
+                                    <DialogDescription>
+                                      Confirm or reschedule the appointment for {appointment.research_title}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4 py-4">
+                                    <div className="space-y-2">
+                                      <Label>Current Date</Label>
+                                      <p className="text-sm text-gray-600">
+                                        {format(new Date(appointment.date), "PPP 'at' p")}
+                                      </p>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <Label>Reschedule (Optional)</Label>
+                                      <Popover>
+                                        <PopoverTrigger>
+                                          <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {rescheduleDate ? format(rescheduleDate, "PPP") : "Select new date"}
+                                          </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                          <Calendar
+                                            mode="single"
+                                            selected={rescheduleDate}
+                                            onSelect={setRescheduleDate}
+                                            disabled={(date) => date < new Date()}
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+                                    </div>
+                                    {rescheduleDate && (
+                                      <div className="space-y-2">
+                                        <Label>New Time</Label>
+                                        <Select value={rescheduleTime} onValueChange={(value) => setRescheduleTime(value || "")}>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select time" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            {availableSlots.map((slot) => (
+                                              <SelectItem key={slot.hour} value={slot.time}>
+                                                {slot.display || `${slot.time} - ${slot.endTime || 'N/A'}`}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <DialogFooter>
+                                    <Button
+                                      onClick={() => handleUpdateStatus(appointment.id, "APPROVED")}
+                                      className="bg-green-500 hover:bg-green-600"
+                                    >
+                                      <Check className="h-4 w-4 mr-1" /> Approve as is
+                                    </Button>
+                                    {rescheduleDate && rescheduleTime && (
+                                      <Button
+                                        onClick={handleReschedule}
+                                        className="bg-orange-500 hover:bg-orange-600"
+                                      >
+                                        Approve & Reschedule
+                                      </Button>
+                                    )}
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                                onClick={() => handleUpdateStatus(appointment.id, "NOT APPROVED")}
+                              >
+                                <X className="h-4 w-4 mr-1" /> Not Approve
+                              </Button>
+                            </div>
+                          )}
+                          {appointment.status === "APPROVED" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                              onClick={() => handleUpdateStatus(appointment.id, "COMPLETED")}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" /> Mark Complete
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
