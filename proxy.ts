@@ -29,7 +29,7 @@ function parseSessionCookie(request: NextRequest): SessionData | null {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { supabase, response } = createClient(request);
   const path = request.nextUrl.pathname;
 
