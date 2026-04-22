@@ -62,9 +62,12 @@ export async function GET(request: Request) {
     const studentName = searchParams.get('studentName');
     const trackingNumber = searchParams.get('trackingNumber');
 
+    console.log('GET appointments - All params:', { acadYear, researchType, defenseType, status, studentName, trackingNumber });
+
     // Allow public access for tracking by tracking number
     // Only require authentication for admin operations (not tracking)
     if (!trackingNumber) {
+      console.log('No tracking number, checking authentication...');
       // Get user from session to check auth
       let isAuthenticated = false;
 

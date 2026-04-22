@@ -116,9 +116,13 @@ export default function TrackPage() {
     setTrackingResult(null);
 
     try {
-      const response = await fetch(`/api/appointments?tracking_number=${trackingNumber.trim()}`);
+      const trimmedNumber = trackingNumber.trim();
+      console.log('Tracking request for:', trimmedNumber);
+      const response = await fetch(`/api/appointments?tracking_number=${trimmedNumber}`);
+      console.log('Response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Response data:', data);
         if (data.length > 0) {
           setTrackingResult(data[0]);
         } else {
