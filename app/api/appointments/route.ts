@@ -98,11 +98,16 @@ export async function GET(request: Request) {
     if (defenseType) query = query.eq('defense_type', defenseType);
     if (status) query = query.eq('status', status);
     if (studentName) query = query.eq('student_name', studentName);
-    if (trackingNumber) query = query.eq('tracking_number', trackingNumber);
+    if (trackingNumber) {
+      console.log('Tracking by number:', trackingNumber);
+      query = query.eq('tracking_number', trackingNumber);
+    }
 
     query = query.order('created_at', { ascending: false });
 
     const { data: appointments, error } = await query;
+
+    console.log('Appointments query result:', { appointments, error });
 
     if (error) {
       console.error('Get appointments error:', error);

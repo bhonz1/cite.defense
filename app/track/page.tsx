@@ -221,90 +221,143 @@ export default function TrackPage() {
             </CardContent>
           </Card>
 
-          {/* Tracking Result - Plain Text Table */}
+          {/* Tracking Result - Modern Responsive UI */}
           {trackingResult && (
-            <Card className="border-0 shadow-lg bg-white">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <CardTitle className="text-lg sm:text-xl font-bold">Appointment Details</CardTitle>
-                  <Badge className={`bg-white text-orange-600 font-bold text-xs sm:text-sm ${getStatusColor(trackingResult.status)}`}>
-                    {trackingResult.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6">
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Tracking Number</TableCell>
-                      <TableCell className="py-3 px-4 border-b font-mono">{trackingResult.tracking_number}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Appointment Code</TableCell>
-                      <TableCell className="py-3 px-4 border-b font-mono">{trackingResult.appointment_code}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Research Title</TableCell>
-                      <TableCell className="py-3 px-4 border-b">{trackingResult.research_title}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Group Code</TableCell>
-                      <TableCell className="py-3 px-4 border-b">{trackingResult.group_code}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Research Type</TableCell>
-                      <TableCell className="py-3 px-4 border-b">{trackingResult.research_type}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Defense Type</TableCell>
-                      <TableCell className="py-3 px-4 border-b">{trackingResult.defense_type}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Adviser</TableCell>
-                      <TableCell className="py-3 px-4 border-b">{trackingResult.adviser_name}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Date</TableCell>
-                      <TableCell className="py-3 px-4 border-b">
-                        {new Date(trackingResult.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4 border-b">Time</TableCell>
-                      <TableCell className="py-3 px-4 border-b">{trackingResult.time_desc}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-semibold text-gray-700 py-3 px-4">Room</TableCell>
-                      <TableCell className="py-3 px-4">{trackingResult.room}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-
-                {trackingResult.students && trackingResult.students.length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="font-semibold text-gray-900 mb-3">Team Members</h3>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="font-semibold text-gray-700">Name</TableHead>
-                          <TableHead className="font-semibold text-gray-700">Role</TableHead>
-                          <TableHead className="font-semibold text-gray-700">Email</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {trackingResult.students.map((student, index) => (
-                          <TableRow key={index}>
-                            <TableCell className="py-2 px-4 border-b">{student.name}</TableCell>
-                            <TableCell className="py-2 px-4 border-b">{student.role}</TableCell>
-                            <TableCell className="py-2 px-4 border-b">{student.email}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+            <div className="space-y-4 sm:space-y-6">
+              {/* Status Card */}
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                      <p className="text-xs sm:text-sm text-white/80 uppercase tracking-wider mb-1">Defense Status</p>
+                      <h2 className="text-xl sm:text-2xl font-bold">{trackingResult.status}</h2>
+                    </div>
+                    <div className={`px-4 py-2 rounded-full border-2 bg-white/20 backdrop-blur-sm flex items-center gap-2`}>
+                      {getStatusIcon(trackingResult.status)}
+                      <span className="font-semibold text-sm">{trackingResult.status}</span>
+                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Research Title Card */}
+              <Card className="border-0 shadow-lg bg-white">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-orange-600">
+                      <FileText className="h-5 w-5" />
+                      <p className="text-xs font-bold uppercase tracking-wider">Research Title</p>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 leading-tight">{trackingResult.research_title}</h3>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Tracking Number */}
+                <Card className="border-0 shadow-md bg-white">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Tracking Number</p>
+                    <p className="font-mono font-bold text-gray-900 text-sm sm:text-base break-all">{trackingResult.tracking_number}</p>
+                  </CardContent>
+                </Card>
+
+                {/* Appointment Code */}
+                <Card className="border-0 shadow-md bg-white">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Appointment Code</p>
+                    <p className="font-mono font-bold text-gray-900 text-sm sm:text-base">{trackingResult.appointment_code}</p>
+                  </CardContent>
+                </Card>
+
+                {/* Group Code */}
+                <Card className="border-0 shadow-md bg-white">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Group Code</p>
+                    <p className="font-bold text-gray-900 text-sm sm:text-base">{trackingResult.group_code}</p>
+                  </CardContent>
+                </Card>
+
+                {/* Research Type */}
+                <Card className="border-0 shadow-md bg-white">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Research Type</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{trackingResult.research_type}</p>
+                  </CardContent>
+                </Card>
+
+                {/* Defense Type */}
+                <Card className="border-0 shadow-md bg-white">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Defense Type</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{trackingResult.defense_type}</p>
+                  </CardContent>
+                </Card>
+
+                {/* Adviser */}
+                <Card className="border-0 shadow-md bg-white">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Adviser</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{trackingResult.adviser_name}</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Schedule Card */}
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-2 text-blue-600 mb-4">
+                    <CalendarDays className="h-5 w-5" />
+                    <p className="text-xs font-bold uppercase tracking-wider">Defense Schedule</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <p className="text-xs text-gray-500 mb-1">Date</p>
+                      <p className="font-semibold text-gray-900 text-sm">
+                        {new Date(trackingResult.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <p className="text-xs text-gray-500 mb-1">Time</p>
+                      <p className="font-semibold text-gray-900 text-sm">{trackingResult.time_desc}</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <p className="text-xs text-gray-500 mb-1">Room</p>
+                      <p className="font-semibold text-gray-900 text-sm">{trackingResult.room}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Team Members */}
+              {trackingResult.students && trackingResult.students.length > 0 && (
+                <Card className="border-0 shadow-lg bg-white">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center gap-2 text-gray-700 mb-4">
+                      <Users className="h-5 w-5" />
+                      <p className="text-xs font-bold uppercase tracking-wider">Team Members</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {trackingResult.students.map((student, index) => (
+                        <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <User className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-gray-900 text-sm">{student.name}</p>
+                              <p className="text-xs text-gray-600 mt-1">{student.role}</p>
+                              <p className="text-xs text-gray-500 mt-0.5 truncate">{student.email}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           )}
         </div>
       </main>
