@@ -60,7 +60,7 @@ export async function GET(request: Request) {
     const defenseType = searchParams.get('defenseType');
     const status = searchParams.get('status');
     const studentName = searchParams.get('studentName');
-    const trackingNumber = searchParams.get('trackingNumber');
+    const trackingNumber = searchParams.get('tracking_number');
 
     console.log('GET appointments - All params:', { acadYear, researchType, defenseType, status, studentName, trackingNumber });
 
