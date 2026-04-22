@@ -835,7 +835,7 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader className="bg-gradient-to-r from-orange-50 to-red-50 border-b-2 border-orange-200">
                     <TableRow className="hover:bg-orange-100/50">
-                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[200px]">Research Title</TableHead>
+                      <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[300px] max-w-[400px]">Research Title</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[180px]">Team Members</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[120px]">Type</TableHead>
                       <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-4 px-4 min-w-[140px]">Date & Time</TableHead>
