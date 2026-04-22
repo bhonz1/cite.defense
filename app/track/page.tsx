@@ -223,63 +223,63 @@ export default function TrackPage() {
           {trackingResult && (
             <Card className="border-0 shadow-lg bg-white">
               <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl font-bold">Appointment Details</CardTitle>
-                  <Badge className={`bg-white text-orange-600 font-bold ${getStatusColor(trackingResult.status)}`}>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <CardTitle className="text-lg sm:text-xl font-bold">Appointment Details</CardTitle>
+                  <Badge className={`bg-white text-orange-600 font-bold text-xs sm:text-sm ${getStatusColor(trackingResult.status)}`}>
                     {trackingResult.status}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="p-6 space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 {/* Tracking Number */}
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-200">
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Tracking Number</p>
-                  <p className="text-lg font-mono font-bold text-gray-900">{trackingResult.tracking_number}</p>
+                  <p className="text-base sm:text-lg font-mono font-bold text-gray-900 break-all">{trackingResult.tracking_number}</p>
                 </div>
 
                 {/* Research Title */}
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Research Title</p>
-                  <p className="text-base font-semibold text-gray-900">{trackingResult.research_title}</p>
+                  <p className="text-sm sm:text-base font-semibold text-gray-900 break-words">{trackingResult.research_title}</p>
                 </div>
 
                 {/* Grid for details */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Group Code</p>
-                    <p className="font-semibold text-gray-900">{trackingResult.group_code}</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{trackingResult.group_code}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Research Type</p>
-                    <p className="font-semibold text-gray-900">{trackingResult.research_type}</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{trackingResult.research_type}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Defense Type</p>
-                    <p className="font-semibold text-gray-900">{trackingResult.defense_type}</p>
+                    <p className="font-semibold text-gray-900 text-sm sm:text-base">{trackingResult.defense_type}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Adviser</p>
-                    <p className="font-semibold text-gray-900 text-sm">{trackingResult.adviser_name}</p>
+                    <p className="font-semibold text-gray-900 text-xs sm:text-sm">{trackingResult.adviser_name}</p>
                   </div>
                 </div>
 
                 {/* Schedule */}
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 sm:p-4 border border-blue-200">
                   <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">Defense Schedule</p>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div>
                       <p className="text-xs text-gray-600 mb-1">Date</p>
-                      <p className="font-semibold text-gray-900 text-sm">
+                      <p className="font-semibold text-gray-900 text-xs sm:text-sm">
                         {new Date(trackingResult.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600 mb-1">Time</p>
-                      <p className="font-semibold text-gray-900 text-sm">{trackingResult.time_desc}</p>
+                      <p className="font-semibold text-gray-900 text-xs sm:text-sm">{trackingResult.time_desc}</p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-600 mb-1">Room</p>
-                      <p className="font-semibold text-gray-900 text-sm">{trackingResult.room}</p>
+                      <p className="font-semibold text-gray-900 text-xs sm:text-sm">{trackingResult.room}</p>
                     </div>
                   </div>
                 </div>
@@ -291,10 +291,10 @@ export default function TrackPage() {
                     <div className="space-y-2">
                       {trackingResult.students.map((student, index) => (
                         <div key={index} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                          <User className="h-5 w-5 text-gray-600" />
-                          <div className="flex-1">
-                            <p className="font-semibold text-gray-900 text-sm">{student.name}</p>
-                            <p className="text-xs text-gray-600">{student.role} • {student.email}</p>
+                          <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 text-xs sm:text-sm truncate">{student.name}</p>
+                            <p className="text-xs text-gray-600 truncate">{student.role} • {student.email}</p>
                           </div>
                         </div>
                       ))}
