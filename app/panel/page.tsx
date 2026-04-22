@@ -44,24 +44,56 @@ export default function PanelDashboard() {
   const [user, setUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const toggleRow = (id: string) => {
+    setExpandedRows(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const parseSessionCookie = () => {
+    const cookies = document.cookie.split(';').reduce((acc: any, cookie: string) => {
+      const [key, value] = cookie.trim().split('=');
+      acc[key] = value;
+      return acc;
+    }, {});
+    const sessionCookie = cookies['session'];
+    if (sessionCookie) {
+      try {
+        const sessionData = JSON.parse(Buffer.from(sessionCookie, 'base64').toString());
+        return sessionData;
+      } catch (error) {
+        console.error('Error parsing session cookie:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
+        const session = parseSessionCookie();
+        if (!session) {
           router.push("/auth/login");
           return;
         }
-        if (user.user_metadata?.role !== "PANEL") {
+        if (session.role !== "PANEL") {
           router.push("/student");
           return;
         }
-        setUser(user);
-        fetchAssignedAppointments(user.user_metadata?.name || user.email || "");
+        setUser(session);
+        fetchAssignedAppointments(session.name || session.username || "");
       } catch (error) {
         console.error("Auth error:", error);
         router.push("/auth/login");
@@ -70,7 +102,7 @@ export default function PanelDashboard() {
       }
     };
     checkAuth();
-  }, [router, supabase]);
+  }, [router]);
 
   const fetchAssignedAppointments = async (panelistName: string) => {
     try {
@@ -148,12 +180,15 @@ export default function PanelDashboard() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-sm text-gray-600">
-                {user?.user_metadata?.fullname || user?.email}
+                {user?.name || user?.username}
               </span>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => supabase.auth.signOut()}
+                onClick={() => {
+                  document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                  router.push('/auth/login');
+                }}
                 className="text-red-600 border-red-200 hover:bg-red-50"
               >
                 Sign Out
