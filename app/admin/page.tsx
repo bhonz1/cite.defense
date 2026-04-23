@@ -423,9 +423,11 @@ export default function AdminDashboard() {
       const response = await fetch('/api/users');
       if (response.ok) {
         const data = await response.json();
+        console.log('All users:', data);
         setUsers(data);
         // Filter panel users
         const panelUsers = data.filter((user: any) => user.role === 'PANEL');
+        console.log('Panel users filtered:', panelUsers);
         setPanelUsers(panelUsers);
       } else {
         const errorData = await response.json().catch(() => ({}));
