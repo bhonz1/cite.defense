@@ -289,7 +289,8 @@ export default function AdminDashboard() {
             const isAvailable = await checkPanelistAvailability(
               panelUser.fullname || panelUser.name || panelUser.username || '',
               selectedAppointment.date,
-              selectedAppointment.time_desc
+              selectedAppointment.time_desc,
+              selectedAppointment.research_type
             );
             return { ...panelUser, isAvailable };
           })
@@ -406,6 +407,7 @@ export default function AdminDashboard() {
               groupCodes.includes(apt.group_code) &&
               apt.date === appointment.date &&
               apt.time_desc === appointment.time_desc &&
+              apt.research_type === appointment.research_type && // Only conflict if same research type
               apt.status !== 'NOT APPROVED' &&
               apt.status !== 'COMPLETED'
             );
@@ -505,7 +507,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const checkPanelistAvailability = async (panelistName: string, appointmentDate: string, appointmentTime: string): Promise<boolean> => {
+  const checkPanelistAvailability = async (panelistName: string, appointmentDate: string, appointmentTime: string, researchType: string): Promise<boolean> => {
     try {
       // Fetch all panelist records for this panelist
       const panelistsResponse = await fetch('/api/panelists');
@@ -526,6 +528,7 @@ export default function AdminDashboard() {
         groupCodes.includes(apt.group_code) &&
         apt.date === appointmentDate &&
         apt.time_desc === appointmentTime &&
+        apt.research_type === researchType && // Only conflict if same research type
         apt.status !== 'NOT APPROVED' &&
         apt.status !== 'COMPLETED'
       );
