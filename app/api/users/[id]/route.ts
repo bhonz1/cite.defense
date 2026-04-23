@@ -23,16 +23,17 @@ export async function PUT(
       }
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    // Check custom session cookie for authentication
+    const sessionCookie = cookieStore.get('session');
+    if (!sessionCookie?.value) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    if (user.user_metadata?.role !== 'ADMIN') {
+    const sessionData = JSON.parse(Buffer.from(sessionCookie.value, 'base64').toString());
+    if (sessionData.role !== 'ADMIN' && sessionData.role !== 'SUPERADMIN') {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
@@ -100,28 +101,38 @@ export async function DELETE(
       }
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    // Check custom session cookie for authentication
+    const sessionCookie = cookieStore.get('session');
+    if (!sessionCookie?.value) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    if (user.user_metadata?.role !== 'ADMIN') {
+    const sessionData = JSON.parse(Buffer.from(sessionCookie.value, 'base64').toString());
+    if (sessionData.role !== 'ADMIN' && sessionData.role !== 'SUPERADMIN') {
       return NextResponse.json(
         { error: 'Forbidden - Admin access required' },
         { status: 403 }
       );
     }
 
-    // Note: Without service role key, we can't use admin.deleteUser
-    // This is a limitation - we would need service role key for full user management
-    return NextResponse.json(
-      { error: 'Service role key required for user deletion' },
-      { status: 501 }
-    );
+    // Delete user from the custom users table
+    const { error: deleteError } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      console.error('Delete user error:', deleteError);
+      return NextResponse.json(
+        { error: 'Failed to delete user', details: deleteError.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
 
   } catch (error) {
     console.error('Users API error:', error);
