@@ -533,6 +533,21 @@ export default function AdminDashboard() {
         return acc;
       }, {});
 
+      // Sort groupCodes by date and time for each stat
+      Object.values(stats).forEach((stat: any) => {
+        stat.groupCodes.sort((a: any, b: any) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          if (dateA !== dateB) {
+            return dateA - dateB;
+          }
+          // If same date, sort by time
+          const timeA = a.time || '';
+          const timeB = b.time || '';
+          return timeA.localeCompare(timeB);
+        });
+      });
+
       setPanelistStats(Object.values(stats));
     } catch (error) {
       console.error('Fetch panelist stats error:', error);
