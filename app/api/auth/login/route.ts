@@ -37,10 +37,20 @@ export async function POST(request: Request) {
     }
 
     console.log('User found:', { id: user.id, username: user.username, name: user.name, role: user.role });
+    console.log('Stored password hash:', user.password);
 
-    // Check password using bcrypt
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log('Password validation result:', isPasswordValid);
+    // Check if password is stored as bcrypt hash or plaintext
+    let isPasswordValid = false;
+
+    if (user.password.startsWith('$2')) {
+      // Password is bcrypt hashed
+      isPasswordValid = await bcrypt.compare(password, user.password);
+      console.log('Bcrypt password validation result:', isPasswordValid);
+    } else {
+      // Password is stored as plaintext (for legacy users)
+      isPasswordValid = password === user.password;
+      console.log('Plaintext password validation result:', isPasswordValid);
+    }
 
     if (!isPasswordValid) {
       console.log('Invalid password');
