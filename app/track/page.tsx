@@ -104,6 +104,7 @@ export default function TrackPage() {
   const [trackingResult, setTrackingResult] = useState<Appointment | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [trackingError, setTrackingError] = useState("");
+  const [panelists, setPanelists] = useState<any[]>([]);
 
   const handleTrackByNumber = async () => {
     if (!trackingNumber.trim()) {
@@ -125,6 +126,18 @@ export default function TrackPage() {
         console.log('Response data:', data);
         if (data.length > 0) {
           setTrackingResult(data[0]);
+          // Fetch panelists if group_code exists
+          if (data[0].group_code) {
+            try {
+              const panelistsResponse = await fetch(`/api/panelists?group_code=${data[0].group_code}`);
+              if (panelistsResponse.ok) {
+                const panelistsData = await panelistsResponse.json();
+                setPanelists(panelistsData);
+              }
+            } catch (error) {
+              console.error('Failed to fetch panelists:', error);
+            }
+          }
         } else {
           setTrackingError("No appointment found with this tracking number");
         }
@@ -353,6 +366,35 @@ export default function TrackPage() {
                               <p className="font-semibold text-gray-900 text-sm">{student.name}</p>
                               <p className="text-xs text-gray-600 mt-1">{student.role}</p>
                               <p className="text-xs text-gray-500 mt-0.5 truncate">{student.email}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Panelists */}
+              {panelists && panelists.length > 0 && (
+                <Card className="border-0 shadow-lg bg-white">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center gap-2 text-orange-600 mb-4">
+                      <Star className="h-5 w-5" />
+                      <p className="text-xs font-bold uppercase tracking-wider">Defense Panelists</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {panelists.map((panelist, index) => (
+                        <div key={index} className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 border border-orange-200">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              panelist.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
+                            }`}>
+                              <User className="h-5 w-5 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-gray-900 text-sm">{panelist.name}</p>
+                              <p className="text-xs font-bold text-orange-600 mt-1">{panelist.role}</p>
                             </div>
                           </div>
                         </div>
