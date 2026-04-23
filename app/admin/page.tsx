@@ -958,9 +958,9 @@ export default function AdminDashboard() {
                                         <div className="space-y-2">
                                           <p>Assign panel members and confirm the appointment</p>
                                           <div className="bg-gray-50 rounded-lg p-3 space-y-1">
-                                            <p className="text-sm"><span className="font-semibold text-gray-700">Research Title:</span> <span className="text-gray-900">{appointment.research_title}</span></p>
-                                            <p className="text-sm"><span className="font-semibold text-gray-700">Appointment Code:</span> <span className="font-mono text-gray-900">{appointment.appointment_code}</span></p>
-                                            <p className="text-sm"><span className="font-semibold text-gray-700">Group Code:</span> <span className="font-mono text-gray-900">{appointment.group_code}</span></p>
+                                            <p className="text-sm"><span className="font-semibold text-gray-700">Research Title:</span> <span className="text-gray-900">{selectedAppointment?.research_title}</span></p>
+                                            <p className="text-sm"><span className="font-semibold text-gray-700">Appointment Code:</span> <span className="font-mono text-gray-900">{selectedAppointment?.appointment_code}</span></p>
+                                            <p className="text-sm"><span className="font-semibold text-gray-700">Group Code:</span> <span className="font-mono text-gray-900">{selectedAppointment?.group_code}</span></p>
                                           </div>
                                         </div>
                                       </DialogDescription>
