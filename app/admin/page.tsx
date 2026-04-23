@@ -1225,7 +1225,7 @@ export default function AdminDashboard() {
                                         }`}
                                         onClick={() => {
                                           if (panelists.chairman && panelists.member1 && panelists.member2) {
-                                            handleApproveWithPanelists(appointment.id);
+                                            handleApproveWithPanelists(selectedAppointment?.id || '');
                                             setIsApproveDialogOpen(false);
                                           }
                                         }}
