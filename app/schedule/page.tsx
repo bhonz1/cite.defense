@@ -94,7 +94,7 @@ function Navigation() {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              LOGIN
+              ADMIN
             </Link>
           </div>
         </div>
