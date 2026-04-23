@@ -91,18 +91,45 @@ export default function PanelDashboard() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Wait a moment for cookie to be set after login
+        await new Promise(resolve => setTimeout(resolve, 100));
+
         const session = parseSessionCookie();
         console.log('Panel session:', session);
+        console.log('Current cookies:', document.cookie);
+
         if (!session) {
-          console.log('No session found, redirecting to panel login');
-          router.push("/auth/panel-login");
+          // Try one more time after a delay
+          console.log('No session found, waiting and retrying...');
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const retrySession = parseSessionCookie();
+          console.log('Retry session:', retrySession);
+
+          if (!retrySession) {
+            console.log('Still no session after retry, redirecting to panel login');
+            router.push("/auth/panel-login");
+            return;
+          }
+
+          // Use the retry session
+          if (retrySession.role !== "PANEL") {
+            console.log('Invalid role on retry:', retrySession.role, 'redirecting to panel login');
+            router.push("/auth/panel-login");
+            return;
+          }
+
+          console.log('Session valid after retry, setting user');
+          setUser(retrySession);
+          fetchAssignedAppointments(retrySession.name || retrySession.username || "");
           return;
         }
+
         if (session.role !== "PANEL") {
           console.log('Invalid role:', session.role, 'redirecting to panel login');
           router.push("/auth/panel-login");
           return;
         }
+
         console.log('Session valid, setting user');
         console.log('Session name:', session.name);
         console.log('Session username:', session.username);
