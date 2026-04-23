@@ -102,6 +102,9 @@ export default function PanelLoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   className="border-gray-300"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
                 />
               </div>
               <div className="space-y-2">
@@ -113,6 +116,7 @@ export default function PanelLoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="border-gray-300"
+                  autoComplete="current-password"
                 />
               </div>
               <Button
