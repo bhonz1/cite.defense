@@ -104,6 +104,8 @@ export default function PanelDashboard() {
           return;
         }
         console.log('Session valid, setting user');
+        console.log('Session name:', session.name);
+        console.log('Session username:', session.username);
         setUser(session);
         fetchAssignedAppointments(session.name || session.username || "");
       } catch (error) {

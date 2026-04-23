@@ -21,6 +21,7 @@ export default function PanelLoginPage() {
     setIsLoading(true);
 
     try {
+      console.log('Attempting panel login for username:', username);
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,19 +29,23 @@ export default function PanelLoginPage() {
       });
 
       const data = await res.json();
+      console.log('Login response:', data);
 
       if (!res.ok) {
+        console.error('Login failed:', data.error);
         toast.error(data.error || "Invalid username or password");
       } else {
         // Check if user is PANEL
+        console.log('User role from response:', data.user?.role);
         if (data.user?.role !== "PANEL") {
+          console.error('Invalid role for panel login:', data.user?.role);
           toast.error("This login is for PANEL users only");
           setIsLoading(false);
           return;
         }
 
         toast.success("Login successful!");
-        
+
         // Redirect to panel
         const targetPath = "/panel";
 
@@ -58,6 +63,7 @@ export default function PanelLoginPage() {
         }, 500);
       }
     } catch (error) {
+      console.error('Panel login error:', error);
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
