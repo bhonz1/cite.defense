@@ -1341,7 +1341,7 @@ export default function AdminDashboard() {
                                       <Check className="h-3.5 w-3.5 mr-1.5" /> Approve
                                     </div>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                                  <DialogContent className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                                     <DialogHeader className="pb-6">
                                       <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
