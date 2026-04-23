@@ -163,6 +163,7 @@ export default function AdminDashboard() {
   });
   const [appointmentsPanelists, setAppointmentsPanelists] = useState<Record<string, any[]>>({});
   const [users, setUsers] = useState<any[]>([]);
+  const [panelUsers, setPanelUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
@@ -423,14 +424,19 @@ export default function AdminDashboard() {
       if (response.ok) {
         const data = await response.json();
         setUsers(data);
+        // Filter panel users
+        const panelUsers = data.filter((user: any) => user.role === 'PANEL');
+        setPanelUsers(panelUsers);
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.error('Failed to fetch users:', response.status, errorData);
         setUsers([]);
+        setPanelUsers([]);
       }
     } catch (error) {
       console.error('Fetch users error:', error);
       setUsers([]);
+      setPanelUsers([]);
     }
   };
 
@@ -969,13 +975,22 @@ export default function AdminDashboard() {
                                               </div>
                                               <Label htmlFor="chairman" className="text-sm font-semibold text-gray-700">Panel Chairman *</Label>
                                             </div>
-                                            <Input
-                                              id="chairman"
-                                              value={panelists.chairman}
-                                              onChange={(e) => setPanelists({...panelists, chairman: e.target.value.toUpperCase()})}
-                                              placeholder="Enter panel chairman name"
-                                              className="h-11 border-gray-300 w-full"
-                                            />
+                                            <Select value={panelists.chairman} onValueChange={(value) => setPanelists({...panelists, chairman: value})}>
+                                              <SelectTrigger className="h-11 border-gray-300 w-full">
+                                                <SelectValue placeholder="Select panel chairman" />
+                                              </SelectTrigger>
+                                              <SelectContent>
+                                                {panelUsers.length === 0 ? (
+                                                  <div className="p-2 text-sm text-gray-500">No panel users available</div>
+                                                ) : (
+                                                  panelUsers.map((user) => (
+                                                    <SelectItem key={user.id} value={user.name || user.username || ''}>
+                                                      {user.name || user.username || 'Unknown'}
+                                                    </SelectItem>
+                                                  ))
+                                                )}
+                                              </SelectContent>
+                                            </Select>
                                           </div>
 
                                           {/* Members */}
@@ -987,13 +1002,22 @@ export default function AdminDashboard() {
                                                 </div>
                                                 <Label htmlFor="member1" className="text-sm font-semibold text-gray-700">Panel Member 1 *</Label>
                                               </div>
-                                              <Input
-                                                id="member1"
-                                                value={panelists.member1}
-                                                onChange={(e) => setPanelists({...panelists, member1: e.target.value.toUpperCase()})}
-                                                placeholder="Enter panel member name"
-                                                className="h-11 border-gray-300 w-full"
-                                              />
+                                              <Select value={panelists.member1} onValueChange={(value) => setPanelists({...panelists, member1: value})}>
+                                                <SelectTrigger className="h-11 border-gray-300 w-full">
+                                                  <SelectValue placeholder="Select panel member 1" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {panelUsers.length === 0 ? (
+                                                    <div className="p-2 text-sm text-gray-500">No panel users available</div>
+                                                  ) : (
+                                                    panelUsers.map((user) => (
+                                                      <SelectItem key={user.id} value={user.name || user.username || ''}>
+                                                        {user.name || user.username || 'Unknown'}
+                                                      </SelectItem>
+                                                    ))
+                                                  )}
+                                                </SelectContent>
+                                              </Select>
                                             </div>
                                             <div className="space-y-2">
                                               <div className="flex items-center gap-2">
@@ -1002,13 +1026,22 @@ export default function AdminDashboard() {
                                                 </div>
                                                 <Label htmlFor="member2" className="text-sm font-semibold text-gray-700">Panel Member 2 *</Label>
                                               </div>
-                                              <Input
-                                                id="member2"
-                                                value={panelists.member2}
-                                                onChange={(e) => setPanelists({...panelists, member2: e.target.value.toUpperCase()})}
-                                                placeholder="Enter panel member name"
-                                                className="h-11 border-gray-300 w-full"
-                                              />
+                                              <Select value={panelists.member2} onValueChange={(value) => setPanelists({...panelists, member2: value})}>
+                                                <SelectTrigger className="h-11 border-gray-300 w-full">
+                                                  <SelectValue placeholder="Select panel member 2" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  {panelUsers.length === 0 ? (
+                                                    <div className="p-2 text-sm text-gray-500">No panel users available</div>
+                                                  ) : (
+                                                    panelUsers.map((user) => (
+                                                      <SelectItem key={user.id} value={user.name || user.username || ''}>
+                                                        {user.name || user.username || 'Unknown'}
+                                                      </SelectItem>
+                                                    ))
+                                                  )}
+                                                </SelectContent>
+                                              </Select>
                                             </div>
                                           </div>
                                         </div>
