@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import bcrypt from 'bcryptjs';
 
 export async function PUT(
   request: NextRequest,
@@ -51,7 +52,9 @@ export async function PUT(
     };
 
     if (password) {
-      updateData.password = password;
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateData.password = hashedPassword;
     }
 
     const { data: updatedUser, error: updateError } = await supabase

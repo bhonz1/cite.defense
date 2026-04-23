@@ -1618,6 +1618,21 @@ export default function AdminDashboard() {
                     </Select>
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editUserPassword" className="text-sm font-semibold text-gray-700">New Password (Optional)</Label>
+                  <div className="relative">
+                    <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Input 
+                      id="editUserPassword" 
+                      type="password"
+                      placeholder="Leave empty to keep current password"
+                      className="pl-10 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      value={selectedUser.password || ''}
+                      onChange={(e) => setSelectedUser({ ...selectedUser, password: e.target.value })}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500">Leave empty to keep the current password</p>
+                </div>
               </div>
             )}
             <DialogFooter className="px-6 pb-6">
