@@ -28,8 +28,8 @@ const statuses = ["All", "PENDING", "APPROVED", "NOT APPROVED", "COMPLETED"];
 function AdminNavigation({ user, onSignOut, activeTab, setActiveTab, stats }: { 
   user: any; 
   onSignOut: () => void;
-  activeTab: 'dashboard' | 'list' | 'users';
-  setActiveTab: (tab: 'dashboard' | 'list' | 'users') => void;
+  activeTab: 'dashboard' | 'list' | 'panelist' | 'users';
+  setActiveTab: (tab: 'dashboard' | 'list' | 'panelist' | 'users') => void;
   stats: Stats | null;
 }) {
   const pathname = usePathname();
@@ -64,8 +64,8 @@ function AdminNavigation({ user, onSignOut, activeTab, setActiveTab, stats }: {
             <div
               onClick={() => setActiveTab('list')}
               className={`flex items-center gap-2 font-medium transition-colors cursor-pointer ${
-                activeTab === 'list' 
-                  ? "text-orange-600" 
+                activeTab === 'list'
+                  ? "text-orange-600"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -78,10 +78,21 @@ function AdminNavigation({ user, onSignOut, activeTab, setActiveTab, stats }: {
               )}
             </div>
             <div
+              onClick={() => setActiveTab('panelist')}
+              className={`flex items-center gap-2 font-medium transition-colors cursor-pointer ${
+                activeTab === 'panelist'
+                  ? "text-orange-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <Shield className="h-4 w-4" />
+              panelist
+            </div>
+            <div
               onClick={() => setActiveTab('users')}
               className={`flex items-center gap-2 font-medium transition-colors cursor-pointer ${
-                activeTab === 'users' 
-                  ? "text-orange-600" 
+                activeTab === 'users'
+                  ? "text-orange-600"
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
@@ -143,7 +154,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedView, setSelectedView] = useState<'all' | 'pending' | 'approved' | 'not-approved' | 'completed'>('pending');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'list' | 'users'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'list' | 'panelist' | 'users'>('dashboard');
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     status: "PENDING",
@@ -164,6 +175,7 @@ export default function AdminDashboard() {
   const [appointmentsPanelists, setAppointmentsPanelists] = useState<Record<string, any[]>>({});
   const [users, setUsers] = useState<any[]>([]);
   const [panelUsers, setPanelUsers] = useState<any[]>([]);
+  const [panelistStats, setPanelistStats] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
@@ -253,6 +265,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeTab === 'users' && user?.user_metadata?.role === "ADMIN") {
       fetchUsers();
+    }
+  }, [activeTab, user]);
+
+  useEffect(() => {
+    if (activeTab === 'panelist' && user) {
+      fetchPanelistStats();
     }
   }, [activeTab, user]);
 
@@ -440,6 +458,50 @@ export default function AdminDashboard() {
       console.error('Fetch users error:', error);
       setUsers([]);
       setPanelUsers([]);
+    }
+  };
+
+  const fetchPanelistStats = async () => {
+    try {
+      // Fetch all panelists from the panelist table
+      const response = await fetch('/api/panelists');
+      if (response.ok) {
+        const panelistsData = await response.json();
+        console.log('All panelists:', panelistsData);
+        
+        // Group panelists by name and count their appointments
+        const stats = panelistsData.reduce((acc: any, panelist: any) => {
+          const name = panelist.name;
+          if (!acc[name]) {
+            acc[name] = {
+              name: name,
+              role: panelist.role,
+              totalAppointments: 0,
+              chairmanCount: 0,
+              memberCount: 0,
+              groupCodes: []
+            };
+          }
+          acc[name].totalAppointments += 1;
+          if (panelist.role === 'CHAIRMAN') {
+            acc[name].chairmanCount += 1;
+          } else {
+            acc[name].memberCount += 1;
+          }
+          if (!acc[name].groupCodes.includes(panelist.group_code)) {
+            acc[name].groupCodes.push(panelist.group_code);
+          }
+          return acc;
+        }, {});
+        
+        setPanelistStats(Object.values(stats));
+      } else {
+        console.error('Failed to fetch panelists');
+        setPanelistStats([]);
+      }
+    } catch (error) {
+      console.error('Fetch panelist stats error:', error);
+      setPanelistStats([]);
     }
   };
 
@@ -821,6 +883,87 @@ export default function AdminDashboard() {
                     </Select>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* Panelist View */}
+        {activeTab === "panelist" && (
+          <>
+            <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-md overflow-hidden">
+              <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 p-6 shadow-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                      <Shield className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white">Panelist Statistics</h3>
+                      <p className="text-white/80 text-sm">Summary of Research/Appointments per panel member</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <CardContent className="p-6">
+                {panelistStats.length === 0 ? (
+                  <div className="text-center py-16">
+                    <div className="p-4 bg-gradient-to-br from-orange-100 to-red-100 rounded-full inline-block mb-4">
+                      <Shield className="h-10 w-10 text-orange-500" />
+                    </div>
+                    <p className="text-gray-500">No panelist data available</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {panelistStats.map((stat: any, index: number) => (
+                      <Card key={index} className="border-gray-200 hover:shadow-lg transition-all">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3 mb-4">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              stat.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
+                            }`}>
+                              <User className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-bold text-gray-900 text-lg">{stat.name}</h4>
+                              <Badge variant="outline" className={`text-xs mt-1 ${
+                                stat.role === 'CHAIRMAN' 
+                                  ? 'bg-orange-100 text-orange-700 border-orange-200 font-semibold' 
+                                  : 'bg-blue-100 text-blue-700 border-blue-200 font-semibold'
+                              }`}>
+                                {stat.role}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
+                              <span className="text-sm text-gray-600">Total Appointments</span>
+                              <span className="font-bold text-gray-900">{stat.totalAppointments}</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-orange-50 rounded-lg p-3">
+                              <span className="text-sm text-gray-600">As Chairman</span>
+                              <span className="font-bold text-orange-700">{stat.chairmanCount}</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-blue-50 rounded-lg p-3">
+                              <span className="text-sm text-gray-600">As Member</span>
+                              <span className="font-bold text-blue-700">{stat.memberCount}</span>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-2">Group Codes:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {stat.groupCodes.map((code: string, idx: number) => (
+                                <Badge key={idx} variant="outline" className="text-xs bg-gray-100 text-gray-700 border-gray-200">
+                                  {code}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </>
