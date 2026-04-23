@@ -36,6 +36,7 @@ interface Panelist {
   id: string;
   name: string;
   role: string;
+  group_code: string;
 }
 
 export default function PanelDashboard() {
@@ -119,37 +120,59 @@ export default function PanelDashboard() {
   const fetchAssignedAppointments = async (panelistName: string) => {
     try {
       setIsLoading(true);
-      const { data: appointmentsData, error } = await supabase
+      console.log('Fetching assigned appointments for panelist:', panelistName);
+
+      // First, fetch all panelist records for this panelist
+      const { data: panelistRecords, error: panelistError } = await supabase
+        .from('panelists')
+        .select('*')
+        .eq('name', panelistName);
+
+      if (panelistError) {
+        console.error('Error fetching panelist records:', panelistError);
+        throw panelistError;
+      }
+
+      console.log('Panelist records:', panelistRecords);
+
+      if (!panelistRecords || panelistRecords.length === 0) {
+        console.log('No panelist records found for:', panelistName);
+        setAppointments([]);
+        return;
+      }
+
+      // Extract unique group codes
+      const groupCodes = [...new Set(panelistRecords.map((p: Panelist) => p.group_code))];
+      console.log('Group codes:', groupCodes);
+
+      // Fetch appointments for these group codes
+      const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
         .select('*')
-        .eq('status', 'APPROVED');
+        .in('group_code', groupCodes);
 
-      if (error) throw error;
+      if (appointmentsError) {
+        console.error('Error fetching appointments:', appointmentsError);
+        throw appointmentsError;
+      }
 
-      // Filter appointments where this panelist is assigned
-      const assignedAppointments = await Promise.all(
+      console.log('Appointments:', appointmentsData);
+
+      // Fetch students for each appointment
+      const appointmentsWithStudents = await Promise.all(
         (appointmentsData || []).map(async (apt) => {
-          const { data: panelists } = await supabase
-            .from('panelists')
+          const { data: students } = await supabase
+            .from('students')
             .select('*')
-            .eq('group_code', apt.group_code);
-
-          const isAssigned = panelists?.some((p: Panelist) => p.name === panelistName);
-
-          if (isAssigned) {
-            const { data: students } = await supabase
-              .from('students')
-              .select('*')
-              .eq('appointment_code', apt.appointment_code);
-            return { ...apt, students: students || [] };
-          }
-          return null;
+            .eq('appointment_code', apt.appointment_code);
+          return { ...apt, students: students || [] };
         })
       );
 
-      setAppointments(assignedAppointments.filter((apt): apt is Appointment => apt !== null));
+      setAppointments(appointmentsWithStudents);
     } catch (error) {
       console.error("Error fetching appointments:", error);
+      setAppointments([]);
     } finally {
       setIsLoading(false);
     }
