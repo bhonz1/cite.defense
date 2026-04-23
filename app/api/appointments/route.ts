@@ -295,3 +295,63 @@ export async function POST(request: Request) {
     );
   }
 }
+
+// DELETE appointments by date
+export async function DELETE(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    // Check authentication
+    const session = await parseSessionCookie(cookieStore);
+    if (!session || session.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const dates = searchParams.get('dates'); // comma-separated dates
+
+    if (!dates) {
+      return NextResponse.json(
+        { error: 'Dates parameter required' },
+        { status: 400 }
+      );
+    }
+
+    const dateList = dates.split(',').map(d => d.trim());
+    console.log('Deleting appointments for dates:', dateList);
+
+    // Delete appointments for each date
+    const results = await Promise.all(
+      dateList.map(async (date) => {
+        const { data, error } = await supabase
+          .from('appointments')
+          .delete()
+          .eq('date', date)
+          .select();
+
+        if (error) {
+          console.error(`Error deleting appointments for date ${date}:`, error);
+          return { date, error: error.message, deleted: 0 };
+        }
+
+        console.log(`Deleted ${data?.length || 0} appointments for date ${date}`);
+        return { date, deleted: data?.length || 0 };
+      })
+    );
+
+    return NextResponse.json({
+      success: true,
+      results
+    });
+  } catch (error) {
+    console.error('Delete appointments error:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete appointments' },
+      { status: 500 }
+    );
+  }
+}
