@@ -169,6 +169,7 @@ export default function AdminDashboard() {
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [isNotApproveConfirmOpen, setIsNotApproveConfirmOpen] = useState(false);
+  const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [appointmentToDelete, setAppointmentToDelete] = useState<string | null>(null);
   const [appointmentToNotApprove, setAppointmentToNotApprove] = useState<string | null>(null);
   const [newUser, setNewUser] = useState({ username: '', fullname: '', role: 'PANEL', password: '' });
@@ -939,11 +940,13 @@ export default function AdminDashboard() {
                             <div className="flex gap-2 flex-wrap">
                               {appointment.status === "PENDING" && (
                                 <>
-                                <Dialog>
+                                <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
                                   <DialogTrigger>
                                     <div
                                       className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 cursor-pointer"
-                                      onClick={() => setSelectedAppointment(appointment)}
+                                      onClick={() => {
+                                        setSelectedAppointment(appointment);
+                                      }}
                                     >
                                       <Check className="h-3.5 w-3.5 mr-1.5" /> Approve
                                     </div>
@@ -1050,18 +1053,20 @@ export default function AdminDashboard() {
                                       </div>
                                     </div>
                                     <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-4">
-                                      <div
-                                        className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer w-full sm:w-auto"
+                                      <Button
+                                        variant="outline"
+                                        className="flex-1 h-11 border-gray-300 hover:bg-gray-50 w-full sm:w-auto"
                                         onClick={() => {
                                           setSelectedAppointment(null);
                                           setPanelists({ chairman: "", member1: "", member2: "" });
                                           setRescheduleDate(undefined);
                                           setRescheduleTime("");
                                           setRescheduleRoom("");
+                                          setIsApproveDialogOpen(false);
                                         }}
                                       >
                                         Cancel
-                                      </div>
+                                      </Button>
                                       <div
                                         className={`inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white w-full sm:w-auto ${
                                           !panelists.chairman || !panelists.member1 || !panelists.member2
@@ -1071,6 +1076,7 @@ export default function AdminDashboard() {
                                         onClick={() => {
                                           if (panelists.chairman && panelists.member1 && panelists.member2) {
                                             handleApproveWithPanelists(appointment.id);
+                                            setIsApproveDialogOpen(false);
                                           }
                                         }}
                                       >
