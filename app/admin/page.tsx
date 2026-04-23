@@ -479,7 +479,7 @@ export default function AdminDashboard() {
       const panelistsData = await panelistsResponse.json();
       console.log('All panelists:', panelistsData);
 
-      // Fetch all appointments to get research types
+      // Fetch all appointments to get research types and schedule
       const appointmentsResponse = await fetch('/api/appointments');
       if (!appointmentsResponse.ok) {
         console.error('Failed to fetch appointments');
@@ -489,16 +489,21 @@ export default function AdminDashboard() {
       const appointmentsData = await appointmentsResponse.json();
       console.log('All appointments:', appointmentsData);
 
-      // Create a map of group_code to research_type
-      const groupCodeToResearchType: Record<string, string> = {};
+      // Create a map of group_code to research_type and schedule
+      const groupCodeInfo: Record<string, { researchType: string; date: string; time: string }> = {};
       appointmentsData.forEach((apt: any) => {
-        groupCodeToResearchType[apt.group_code] = apt.research_type;
+        groupCodeInfo[apt.group_code] = {
+          researchType: apt.research_type,
+          date: apt.date,
+          time: apt.time_desc
+        };
       });
 
       // Group panelists by name and research type
       const stats = panelistsData.reduce((acc: any, panelist: any) => {
         const name = panelist.name;
-        const researchType = groupCodeToResearchType[panelist.group_code] || 'UNKNOWN';
+        const info = groupCodeInfo[panelist.group_code] || { researchType: 'UNKNOWN', date: '', time: '' };
+        const researchType = info.researchType;
         const key = `${name}_${researchType}`;
 
         if (!acc[key]) {
@@ -509,7 +514,7 @@ export default function AdminDashboard() {
             totalAppointments: 0,
             chairmanCount: 0,
             memberCount: 0,
-            groupCodes: []
+            groupCodes: [] as Array<{ code: string; date: string; time: string }>
           };
         }
         acc[key].totalAppointments += 1;
@@ -518,8 +523,12 @@ export default function AdminDashboard() {
         } else {
           acc[key].memberCount += 1;
         }
-        if (!acc[key].groupCodes.includes(panelist.group_code)) {
-          acc[key].groupCodes.push(panelist.group_code);
+        if (!acc[key].groupCodes.find((gc: any) => gc.code === panelist.group_code)) {
+          acc[key].groupCodes.push({
+            code: panelist.group_code,
+            date: info.date,
+            time: info.time
+          });
         }
         return acc;
       }, {});
@@ -987,12 +996,22 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                                 <div className="mt-3 pt-3 border-t border-gray-200">
-                                  <p className="text-xs text-gray-500 mb-2">Group Codes:</p>
-                                  <div className="flex flex-wrap gap-1">
-                                    {stat.groupCodes.map((code: string, idx: number) => (
-                                      <Badge key={idx} variant="outline" className="text-xs bg-gray-100 text-gray-700 border-gray-200">
-                                        {code}
-                                      </Badge>
+                                  <p className="text-xs text-gray-500 mb-2">Group Codes & Schedule:</p>
+                                  <div className="flex flex-col gap-2">
+                                    {stat.groupCodes.map((gc: { code: string; date: string; time: string }, idx: number) => (
+                                      <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                        <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-200 font-semibold flex-shrink-0">
+                                          {gc.code}
+                                        </Badge>
+                                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                                          <CalendarIcon className="h-3 w-3" />
+                                          <span>{gc.date ? format(new Date(gc.date), 'MMM dd, yyyy') : 'N/A'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                                          <Clock className="h-3 w-3" />
+                                          <span>{gc.time || 'N/A'}</span>
+                                        </div>
+                                      </div>
                                     ))}
                                   </div>
                                 </div>
@@ -1051,12 +1070,22 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                                 <div className="mt-3 pt-3 border-t border-gray-200">
-                                  <p className="text-xs text-gray-500 mb-2">Group Codes:</p>
-                                  <div className="flex flex-wrap gap-1">
-                                    {stat.groupCodes.map((code: string, idx: number) => (
-                                      <Badge key={idx} variant="outline" className="text-xs bg-gray-100 text-gray-700 border-gray-200">
-                                        {code}
-                                      </Badge>
+                                  <p className="text-xs text-gray-500 mb-2">Group Codes & Schedule:</p>
+                                  <div className="flex flex-col gap-2">
+                                    {stat.groupCodes.map((gc: { code: string; date: string; time: string }, idx: number) => (
+                                      <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                        <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-200 font-semibold flex-shrink-0">
+                                          {gc.code}
+                                        </Badge>
+                                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                                          <CalendarIcon className="h-3 w-3" />
+                                          <span>{gc.date ? format(new Date(gc.date), 'MMM dd, yyyy') : 'N/A'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                                          <Clock className="h-3 w-3" />
+                                          <span>{gc.time || 'N/A'}</span>
+                                        </div>
+                                      </div>
                                     ))}
                                   </div>
                                 </div>
