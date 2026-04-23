@@ -156,7 +156,7 @@ export default function AdminDashboard() {
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [rescheduleRoom, setRescheduleRoom] = useState("");
   const [availableSlots, setAvailableSlots] = useState<{ hour: number; time: string; endTime?: string; code?: string; display?: string }[]>([]);
-  const [panelists, setPanelists] = useState({
+  const [panelists, setPanelists] = useState<{ chairman: string; member1: string; member2: string }>({
     chairman: "",
     member1: "",
     member2: ""
@@ -975,7 +975,7 @@ export default function AdminDashboard() {
                                               </div>
                                               <Label htmlFor="chairman" className="text-sm font-semibold text-gray-700">Panel Chairman *</Label>
                                             </div>
-                                            <Select value={panelists.chairman} onValueChange={(value) => setPanelists({...panelists, chairman: value})}>
+                                            <Select value={panelists.chairman || ''} onValueChange={(value) => setPanelists({...panelists, chairman: value || ''})}>
                                               <SelectTrigger className="h-11 border-gray-300 w-full">
                                                 <SelectValue placeholder="Select panel chairman" />
                                               </SelectTrigger>
@@ -1002,7 +1002,7 @@ export default function AdminDashboard() {
                                                 </div>
                                                 <Label htmlFor="member1" className="text-sm font-semibold text-gray-700">Panel Member 1 *</Label>
                                               </div>
-                                              <Select value={panelists.member1} onValueChange={(value) => setPanelists({...panelists, member1: value})}>
+                                              <Select value={panelists.member1 || ''} onValueChange={(value) => setPanelists({...panelists, member1: value || ''})}>
                                                 <SelectTrigger className="h-11 border-gray-300 w-full">
                                                   <SelectValue placeholder="Select panel member 1" />
                                                 </SelectTrigger>
@@ -1026,7 +1026,7 @@ export default function AdminDashboard() {
                                                 </div>
                                                 <Label htmlFor="member2" className="text-sm font-semibold text-gray-700">Panel Member 2 *</Label>
                                               </div>
-                                              <Select value={panelists.member2} onValueChange={(value) => setPanelists({...panelists, member2: value})}>
+                                              <Select value={panelists.member2 || ''} onValueChange={(value) => setPanelists({...panelists, member2: value || ''})}>
                                                 <SelectTrigger className="h-11 border-gray-300 w-full">
                                                   <SelectValue placeholder="Select panel member 2" />
                                                 </SelectTrigger>
