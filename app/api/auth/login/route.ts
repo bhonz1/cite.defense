@@ -61,12 +61,16 @@ export async function POST(request: Request) {
 
     // Set the session cookie
     response.cookies.set('session', sessionToken, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/',
     });
+
+    console.log('Login successful, session token length:', sessionToken.length);
+    console.log('User role:', user.role);
+    console.log('Response cookies set');
 
     return response;
 
