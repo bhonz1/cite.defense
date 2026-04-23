@@ -33,8 +33,23 @@ export default function LoginPage() {
         toast.error(data.error || "Invalid username or password");
       } else {
         toast.success("Login successful!");
+        
+        // Debug logging
+        console.log('User role:', data.user?.role);
+        console.log('User data:', data.user);
+        
         // Redirect based on role
-        const targetPath = (data.user?.role === "ADMIN" || data.user?.role === "SUPERADMIN") ? "/admin" : data.user?.role === "PANEL" ? "/panel" : "/student";
+        let targetPath: string;
+        if (data.user?.role === "ADMIN" || data.user?.role === "SUPERADMIN") {
+          targetPath = "/admin";
+          console.log('Redirecting to admin');
+        } else if (data.user?.role === "PANEL") {
+          targetPath = "/panel";
+          console.log('Redirecting to panel');
+        } else {
+          targetPath = "/student";
+          console.log('Redirecting to student');
+        }
 
         // Use router.push with await for proper navigation
         await router.push(targetPath);
