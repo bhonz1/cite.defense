@@ -269,6 +269,12 @@ export default function AdminDashboard() {
   }, [activeTab, user]);
 
   useEffect(() => {
+    if (user?.user_metadata?.role === "ADMIN") {
+      fetchUsers();
+    }
+  }, [user]);
+
+  useEffect(() => {
     if (activeTab === 'panelist' && user) {
       fetchPanelistStats();
     }
