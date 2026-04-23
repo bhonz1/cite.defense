@@ -360,6 +360,46 @@ export default function AdminDashboard() {
         throw new Error('Appointment not found');
       }
 
+      // Check for panelist conflicts - same day and time
+      const panelistsToCheck = [panelists.chairman, panelists.member1, panelists.member2];
+      const conflicts: string[] = [];
+
+      for (const panelistName of panelistsToCheck) {
+        if (!panelistName) continue;
+
+        // Fetch all panelist records for this panelist
+        const panelistsResponse = await fetch('/api/panelists');
+        if (panelistsResponse.ok) {
+          const allPanelists = await panelistsResponse.json();
+          const panelistRecords = allPanelists.filter((p: any) => p.name === panelistName);
+
+          // Get group codes for this panelist
+          const groupCodes = panelistRecords.map((p: any) => p.group_code);
+
+          // Fetch appointments for these group codes
+          const appointmentsResponse = await fetch('/api/appointments');
+          if (appointmentsResponse.ok) {
+            const allAppointments = await appointmentsResponse.json();
+            const conflictingAppointments = allAppointments.filter((apt: any) =>
+              groupCodes.includes(apt.group_code) &&
+              apt.date === appointment.date &&
+              apt.time_desc === appointment.time_desc &&
+              apt.status !== 'NOT APPROVED' &&
+              apt.status !== 'COMPLETED'
+            );
+
+            if (conflictingAppointments.length > 0) {
+              conflicts.push(`${panelistName} is already scheduled at ${appointment.date} ${appointment.time_desc}`);
+            }
+          }
+        }
+      }
+
+      if (conflicts.length > 0) {
+        toast.error(conflicts.join('. '));
+        return;
+      }
+
       // Insert panelists into panelist table using group_code
       const panelistsData = [
         {
@@ -389,7 +429,7 @@ export default function AdminDashboard() {
       });
 
       console.log('Panelists API Response Status:', panelistsResponse.status);
-      
+
       if (!panelistsResponse.ok) {
         const errorText = await panelistsResponse.text();
         console.error('Panelists API Error Response:', errorText);
