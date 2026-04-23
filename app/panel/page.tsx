@@ -149,43 +149,19 @@ export default function PanelDashboard() {
   const fetchAssignedAppointments = async (panelistName: string) => {
     try {
       setIsLoading(true);
-      console.log('Fetching assigned appointments for panelist:', panelistName);
+      console.log('Fetching all appointments for panel dashboard');
 
-      // First, fetch all panelist records for this panelist
-      const { data: panelistRecords, error: panelistError } = await supabase
-        .from('panelists')
-        .select('*')
-        .eq('name', panelistName);
-
-      if (panelistError) {
-        console.error('Error fetching panelist records:', panelistError);
-        throw panelistError;
-      }
-
-      console.log('Panelist records:', panelistRecords);
-
-      if (!panelistRecords || panelistRecords.length === 0) {
-        console.log('No panelist records found for:', panelistName);
-        setAppointments([]);
-        return;
-      }
-
-      // Extract unique group codes
-      const groupCodes = [...new Set(panelistRecords.map((p: Panelist) => p.group_code))];
-      console.log('Group codes:', groupCodes);
-
-      // Fetch appointments for these group codes
+      // Fetch all appointments from database
       const { data: appointmentsData, error: appointmentsError } = await supabase
         .from('appointments')
-        .select('*')
-        .in('group_code', groupCodes);
+        .select('*');
 
       if (appointmentsError) {
         console.error('Error fetching appointments:', appointmentsError);
         throw appointmentsError;
       }
 
-      console.log('Appointments:', appointmentsData);
+      console.log('All appointments:', appointmentsData);
 
       // Fetch students for each appointment
       const appointmentsWithStudents = await Promise.all(
