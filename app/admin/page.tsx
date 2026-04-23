@@ -464,41 +464,61 @@ export default function AdminDashboard() {
   const fetchPanelistStats = async () => {
     try {
       // Fetch all panelists from the panelist table
-      const response = await fetch('/api/panelists');
-      if (response.ok) {
-        const panelistsData = await response.json();
-        console.log('All panelists:', panelistsData);
-        
-        // Group panelists by name and count their appointments
-        const stats = panelistsData.reduce((acc: any, panelist: any) => {
-          const name = panelist.name;
-          if (!acc[name]) {
-            acc[name] = {
-              name: name,
-              role: panelist.role,
-              totalAppointments: 0,
-              chairmanCount: 0,
-              memberCount: 0,
-              groupCodes: []
-            };
-          }
-          acc[name].totalAppointments += 1;
-          if (panelist.role === 'CHAIRMAN') {
-            acc[name].chairmanCount += 1;
-          } else {
-            acc[name].memberCount += 1;
-          }
-          if (!acc[name].groupCodes.includes(panelist.group_code)) {
-            acc[name].groupCodes.push(panelist.group_code);
-          }
-          return acc;
-        }, {});
-        
-        setPanelistStats(Object.values(stats));
-      } else {
+      const panelistsResponse = await fetch('/api/panelists');
+      if (!panelistsResponse.ok) {
         console.error('Failed to fetch panelists');
         setPanelistStats([]);
+        return;
       }
+      const panelistsData = await panelistsResponse.json();
+      console.log('All panelists:', panelistsData);
+
+      // Fetch all appointments to get research types
+      const appointmentsResponse = await fetch('/api/appointments');
+      if (!appointmentsResponse.ok) {
+        console.error('Failed to fetch appointments');
+        setPanelistStats([]);
+        return;
+      }
+      const appointmentsData = await appointmentsResponse.json();
+      console.log('All appointments:', appointmentsData);
+
+      // Create a map of group_code to research_type
+      const groupCodeToResearchType: Record<string, string> = {};
+      appointmentsData.forEach((apt: any) => {
+        groupCodeToResearchType[apt.group_code] = apt.research_type;
+      });
+
+      // Group panelists by name and research type
+      const stats = panelistsData.reduce((acc: any, panelist: any) => {
+        const name = panelist.name;
+        const researchType = groupCodeToResearchType[panelist.group_code] || 'UNKNOWN';
+        const key = `${name}_${researchType}`;
+
+        if (!acc[key]) {
+          acc[key] = {
+            name: name,
+            role: panelist.role,
+            researchType: researchType,
+            totalAppointments: 0,
+            chairmanCount: 0,
+            memberCount: 0,
+            groupCodes: []
+          };
+        }
+        acc[key].totalAppointments += 1;
+        if (panelist.role === 'CHAIRMAN') {
+          acc[key].chairmanCount += 1;
+        } else {
+          acc[key].memberCount += 1;
+        }
+        if (!acc[key].groupCodes.includes(panelist.group_code)) {
+          acc[key].groupCodes.push(panelist.group_code);
+        }
+        return acc;
+      }, {});
+
+      setPanelistStats(Object.values(stats));
     } catch (error) {
       console.error('Fetch panelist stats error:', error);
       setPanelistStats([]);
@@ -914,54 +934,134 @@ export default function AdminDashboard() {
                     <p className="text-gray-500">No panelist data available</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {panelistStats.map((stat: any, index: number) => (
-                      <Card key={index} className="border-gray-200 hover:shadow-lg transition-all">
-                        <CardContent className="p-4">
-                          <div className="flex items-start gap-3 mb-4">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              stat.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
-                            }`}>
-                              <User className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-bold text-gray-900 text-lg">{stat.name}</h4>
-                              <Badge variant="outline" className={`text-xs mt-1 ${
-                                stat.role === 'CHAIRMAN' 
-                                  ? 'bg-orange-100 text-orange-700 border-orange-200 font-semibold' 
-                                  : 'bg-blue-100 text-blue-700 border-blue-200 font-semibold'
-                              }`}>
-                                {stat.role}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
-                              <span className="text-sm text-gray-600">Total Appointments</span>
-                              <span className="font-bold text-gray-900">{stat.totalAppointments}</span>
-                            </div>
-                            <div className="flex justify-between items-center bg-orange-50 rounded-lg p-3">
-                              <span className="text-sm text-gray-600">As Chairman</span>
-                              <span className="font-bold text-orange-700">{stat.chairmanCount}</span>
-                            </div>
-                            <div className="flex justify-between items-center bg-blue-50 rounded-lg p-3">
-                              <span className="text-sm text-gray-600">As Member</span>
-                              <span className="font-bold text-blue-700">{stat.memberCount}</span>
-                            </div>
-                          </div>
-                          <div className="mt-3 pt-3 border-t border-gray-200">
-                            <p className="text-xs text-gray-500 mb-2">Group Codes:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {stat.groupCodes.map((code: string, idx: number) => (
-                                <Badge key={idx} variant="outline" className="text-xs bg-gray-100 text-gray-700 border-gray-200">
-                                  {code}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                  <div className="space-y-8">
+                    {/* THESIS Section */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                          <BookOpen className="h-4 w-4 text-white" />
+                        </div>
+                        <h4 className="text-xl font-bold text-gray-900">THESIS</h4>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {panelistStats
+                          .filter((stat: any) => stat.researchType === 'THESIS')
+                          .map((stat: any, index: number) => (
+                            <Card key={index} className="border-gray-200 hover:shadow-lg transition-all">
+                              <CardContent className="p-4">
+                                <div className="flex items-start gap-3 mb-4">
+                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    stat.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
+                                  }`}>
+                                    <User className="h-6 w-6 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-bold text-gray-900 text-lg">{stat.name}</h4>
+                                    <Badge variant="outline" className={`text-xs mt-1 ${
+                                      stat.role === 'CHAIRMAN' 
+                                        ? 'bg-orange-100 text-orange-700 border-orange-200 font-semibold' 
+                                        : 'bg-blue-100 text-blue-700 border-blue-200 font-semibold'
+                                    }`}>
+                                      {stat.role}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
+                                    <span className="text-sm text-gray-600">Total Appointments</span>
+                                    <span className="font-bold text-gray-900">{stat.totalAppointments}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center bg-orange-50 rounded-lg p-3">
+                                    <span className="text-sm text-gray-600">As Chairman</span>
+                                    <span className="font-bold text-orange-700">{stat.chairmanCount}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center bg-blue-50 rounded-lg p-3">
+                                    <span className="text-sm text-gray-600">As Member</span>
+                                    <span className="font-bold text-blue-700">{stat.memberCount}</span>
+                                  </div>
+                                </div>
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <p className="text-xs text-gray-500 mb-2">Group Codes:</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {stat.groupCodes.map((code: string, idx: number) => (
+                                      <Badge key={idx} variant="outline" className="text-xs bg-gray-100 text-gray-700 border-gray-200">
+                                        {code}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        {panelistStats.filter((stat: any) => stat.researchType === 'THESIS').length === 0 && (
+                          <p className="text-gray-500 col-span-3 text-center py-4">No Thesis appointments assigned</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* CAPSTONE Section */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
+                          <Award className="h-4 w-4 text-white" />
+                        </div>
+                        <h4 className="text-xl font-bold text-gray-900">CAPSTONE</h4>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {panelistStats
+                          .filter((stat: any) => stat.researchType === 'CAPSTONE')
+                          .map((stat: any, index: number) => (
+                            <Card key={index} className="border-gray-200 hover:shadow-lg transition-all">
+                              <CardContent className="p-4">
+                                <div className="flex items-start gap-3 mb-4">
+                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    stat.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
+                                  }`}>
+                                    <User className="h-6 w-6 text-white" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-bold text-gray-900 text-lg">{stat.name}</h4>
+                                    <Badge variant="outline" className={`text-xs mt-1 ${
+                                      stat.role === 'CHAIRMAN' 
+                                        ? 'bg-orange-100 text-orange-700 border-orange-200 font-semibold' 
+                                        : 'bg-blue-100 text-blue-700 border-blue-200 font-semibold'
+                                    }`}>
+                                      {stat.role}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
+                                    <span className="text-sm text-gray-600">Total Appointments</span>
+                                    <span className="font-bold text-gray-900">{stat.totalAppointments}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center bg-orange-50 rounded-lg p-3">
+                                    <span className="text-sm text-gray-600">As Chairman</span>
+                                    <span className="font-bold text-orange-700">{stat.chairmanCount}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center bg-blue-50 rounded-lg p-3">
+                                    <span className="text-sm text-gray-600">As Member</span>
+                                    <span className="font-bold text-blue-700">{stat.memberCount}</span>
+                                  </div>
+                                </div>
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <p className="text-xs text-gray-500 mb-2">Group Codes:</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {stat.groupCodes.map((code: string, idx: number) => (
+                                      <Badge key={idx} variant="outline" className="text-xs bg-gray-100 text-gray-700 border-gray-200">
+                                        {code}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        {panelistStats.filter((stat: any) => stat.researchType === 'CAPSTONE').length === 0 && (
+                          <p className="text-gray-500 col-span-3 text-center py-4">No Capstone appointments assigned</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
