@@ -22,12 +22,9 @@ interface Appointment {
 }
 
 const defenseDates = [
-  { date: "2026-05-04", label: "May 4, 2026", type: "THESIS - FINAL" },
   { date: "2026-05-08", label: "May 8, 2026", type: "THESIS - FINAL" },
   { date: "2026-05-11", label: "May 11, 2026", type: "CAPSTONE - PROPOSAL" },
   { date: "2026-05-12", label: "May 12, 2026", type: "CAPSTONE - PROPOSAL" },
-  { date: "2026-05-18", label: "May 18, 2026", type: "CAPSTONE - PROPOSAL" },
-  { date: "2026-05-19", label: "May 19, 2026", type: "CAPSTONE - PROPOSAL" },
 ];
 
 const timeSlots = [
