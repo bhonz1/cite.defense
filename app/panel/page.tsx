@@ -70,10 +70,14 @@ export default function PanelDashboard() {
     console.log('All cookies:', cookies);
     const sessionCookie = cookies['session'];
     console.log('Session cookie value:', sessionCookie);
+    console.log('Session cookie length:', sessionCookie?.length);
     if (sessionCookie) {
       try {
         const sessionData = JSON.parse(Buffer.from(sessionCookie, 'base64').toString());
         console.log('Parsed session data:', sessionData);
+        console.log('Session role:', sessionData.role);
+        console.log('Session role type:', typeof sessionData.role);
+        console.log('Is role PANEL?', sessionData.role === 'PANEL');
         return sessionData;
       } catch (error) {
         console.error('Error parsing session cookie:', error);
