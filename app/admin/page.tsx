@@ -1341,53 +1341,135 @@ export default function AdminDashboard() {
                                       <Check className="h-3.5 w-3.5 mr-1.5" /> Approve
                                     </div>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-4xl w-full">
-                                    <DialogHeader className="pb-4">
-                                      <DialogTitle className="text-2xl font-bold text-gray-900">Approve & Schedule Defense</DialogTitle>
-                                      <DialogDescription className="text-base text-gray-600">
-                                        <div className="space-y-2">
-                                          <p>Assign panel members and confirm the appointment</p>
-                                          <div className="bg-gray-50 rounded-lg p-3 space-y-1">
-                                            <p className="text-sm"><span className="font-semibold text-gray-700">Research Title:</span> <span className="text-gray-900">{selectedAppointment?.research_title}</span></p>
-                                            <p className="text-sm"><span className="font-semibold text-gray-700">Appointment Code:</span> <span className="font-mono text-gray-900">{selectedAppointment?.appointment_code}</span></p>
-                                            <p className="text-sm"><span className="font-semibold text-gray-700">Group Code:</span> <span className="font-mono text-gray-900">{selectedAppointment?.group_code}</span></p>
-                                          </div>
+                                  <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                                    <DialogHeader className="pb-6">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                                          <Check className="h-6 w-6 text-white" />
                                         </div>
-                                      </DialogDescription>
+                                        <div>
+                                          <DialogTitle className="text-2xl font-bold text-gray-900">Approve & Schedule Defense</DialogTitle>
+                                          <DialogDescription className="text-sm text-gray-600 mt-1">
+                                            Assign panel members and confirm the appointment
+                                          </DialogDescription>
+                                        </div>
+                                      </div>
                                     </DialogHeader>
                                     
                                     <div className="space-y-6 py-4">
+                                      {/* Appointment Details Card */}
+                                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                                        <div className="flex items-center gap-2 mb-4">
+                                          <FileText className="h-5 w-5 text-orange-600" />
+                                          <h3 className="text-lg font-semibold text-gray-900">Appointment Details</h3>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                          <div className="space-y-1">
+                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Research Title</p>
+                                            <p className="text-sm font-medium text-gray-900">{selectedAppointment?.research_title}</p>
+                                          </div>
+                                          <div className="space-y-1">
+                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Appointment Code</p>
+                                            <p className="text-sm font-mono text-gray-900">{selectedAppointment?.appointment_code}</p>
+                                          </div>
+                                          <div className="space-y-1">
+                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Group Code</p>
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-sm font-mono text-gray-900">{selectedAppointment?.group_code}</span>
+                                              <Badge className={`text-xs font-semibold ${
+                                                selectedAppointment?.research_type === 'THESIS'
+                                                  ? 'bg-blue-100 text-blue-700 border-blue-200'
+                                                  : 'bg-purple-100 text-purple-700 border-purple-200'
+                                              }`}>
+                                                {selectedAppointment?.research_type}
+                                              </Badge>
+                                            </div>
+                                          </div>
+                                          <div className="space-y-1">
+                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Defense Type</p>
+                                            <Badge className="text-xs font-semibold bg-orange-100 text-orange-700 border-orange-200">
+                                              {selectedAppointment?.defense_type}
+                                            </Badge>
+                                          </div>
+                                          <div className="space-y-1">
+                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date & Time</p>
+                                            <div className="flex items-center gap-2 text-sm text-gray-900">
+                                              <CalendarIcon className="h-4 w-4 text-orange-500" />
+                                              <span>{selectedAppointment?.date ? format(new Date(selectedAppointment.date), 'MMM dd, yyyy') : 'N/A'}</span>
+                                              <Clock className="h-4 w-4 text-orange-400 ml-2" />
+                                              <span>{selectedAppointment?.time_desc}</span>
+                                            </div>
+                                          </div>
+                                          <div className="space-y-1">
+                                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Room</p>
+                                            <div className="flex items-center gap-2 text-sm text-gray-900">
+                                              <MapPin className="h-4 w-4 text-blue-600" />
+                                              <span>{selectedAppointment?.room}</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+
                                       {/* Panelists Section */}
-                                      <div className="space-y-4 border-t border-gray-200 pt-6">
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                      <div className="space-y-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                           <div className="flex items-center gap-2">
                                             <Users className="h-5 w-5 text-orange-600" />
                                             <h3 className="text-lg font-semibold text-gray-900">Defense Panel Members</h3>
-                                            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Required</span>
+                                            <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">Required</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <span className="text-gray-600">Available Panelists:</span>
+                                            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 font-semibold">
+                                              {availablePanelists.length}
+                                            </Badge>
                                           </div>
                                         </div>
-                                        <p className="text-sm text-gray-600">Assign 1 chairman and 2 panel members for this defense.</p>
+                                        <p className="text-sm text-gray-600">Assign 1 chairman and 2 panel members for this defense. Only panelists with no scheduling conflicts are shown.</p>
                                         
-                                        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                                        {availablePanelists.length === 0 && (
+                                          <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                                            <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                                            <div>
+                                              <p className="text-sm font-semibold text-red-900">No Available Panelists</p>
+                                              <p className="text-sm text-red-700">All panelists are already scheduled at this date and time for this research type. Please reschedule the appointment or check panelist availability.</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        
+                                        <div className="bg-white rounded-xl border border-gray-200 p-5 space-y-5 shadow-sm">
                                           {/* Chairman */}
-                                          <div className="space-y-2">
-                                            <div className="flex items-center gap-2">
-                                              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                                                <Shield className="h-4 w-4 text-orange-600" />
+                                          <div className="space-y-3">
+                                            <div className="flex items-center gap-3">
+                                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-md">
+                                                <Shield className="h-5 w-5 text-white" />
                                               </div>
-                                              <Label htmlFor="chairman" className="text-sm font-semibold text-gray-700">Panel Chairman *</Label>
+                                              <div className="flex-1">
+                                                <Label htmlFor="chairman" className="text-sm font-semibold text-gray-900">Panel Chairman</Label>
+                                                <p className="text-xs text-gray-500">Lead the defense proceedings</p>
+                                              </div>
+                                              {panelists.chairman && (
+                                                <Badge className="bg-green-100 text-green-700 border-green-200">
+                                                  <Check className="h-3 w-3 mr-1" /> Selected
+                                                </Badge>
+                                              )}
                                             </div>
                                             <Select value={panelists.chairman || ''} onValueChange={(value) => setPanelists({...panelists, chairman: value || ''})}>
-                                              <SelectTrigger className="h-11 border-gray-300 w-full">
+                                              <SelectTrigger className="h-12 border-gray-300 w-full focus:ring-2 focus:ring-orange-500">
                                                 <SelectValue placeholder="Select panel chairman" />
                                               </SelectTrigger>
                                               <SelectContent>
                                                 {availablePanelists.length === 0 ? (
-                                                  <div className="p-2 text-sm text-gray-500">No available panelists for this schedule</div>
+                                                  <div className="p-3 text-sm text-gray-500 text-center">No available panelists for this schedule</div>
                                                 ) : (
                                                   availablePanelists.map((users) => (
                                                     <SelectItem key={users.id} value={users.fullname || users.name || users.username || ''}>
-                                                      {users.fullname || users.name || users.username || 'Unknown'}
+                                                      <div className="flex items-center gap-2">
+                                                        <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center">
+                                                          <Shield className="h-3 w-3 text-orange-600" />
+                                                        </div>
+                                                        {users.fullname || users.name || users.username || 'Unknown'}
+                                                      </div>
                                                     </SelectItem>
                                                   ))
                                                 )}
@@ -1395,50 +1477,78 @@ export default function AdminDashboard() {
                                             </Select>
                                           </div>
 
+                                          <div className="border-t border-gray-200"></div>
+
                                           {/* Members */}
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                              <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                                  <User className="h-4 w-4 text-blue-600" />
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                            <div className="space-y-3">
+                                              <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-md">
+                                                  <User className="h-5 w-5 text-white" />
                                                 </div>
-                                                <Label htmlFor="member1" className="text-sm font-semibold text-gray-700">Panel Member 1 *</Label>
+                                                <div className="flex-1">
+                                                  <Label htmlFor="member1" className="text-sm font-semibold text-gray-900">Panel Member 1</Label>
+                                                  <p className="text-xs text-gray-500">Evaluate the research</p>
+                                                </div>
+                                                {panelists.member1 && (
+                                                  <Badge className="bg-green-100 text-green-700 border-green-200">
+                                                    <Check className="h-3 w-3 mr-1" /> Selected
+                                                  </Badge>
+                                                )}
                                               </div>
                                               <Select value={panelists.member1 || ''} onValueChange={(value) => setPanelists({...panelists, member1: value || ''})}>
-                                                <SelectTrigger className="h-11 border-gray-300 w-full">
+                                                <SelectTrigger className="h-12 border-gray-300 w-full focus:ring-2 focus:ring-blue-500">
                                                   <SelectValue placeholder="Select panel member 1" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                   {availablePanelists.length === 0 ? (
-                                                    <div className="p-2 text-sm text-gray-500">No available panelists for this schedule</div>
+                                                    <div className="p-3 text-sm text-gray-500 text-center">No available panelists for this schedule</div>
                                                   ) : (
                                                     availablePanelists.map((users) => (
                                                       <SelectItem key={users.id} value={users.fullname || users.name || users.username || ''}>
-                                                        {users.fullname || users.name || users.username || 'Unknown'}
+                                                        <div className="flex items-center gap-2">
+                                                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                                                            <User className="h-3 w-3 text-blue-600" />
+                                                          </div>
+                                                          {users.fullname || users.name || users.username || 'Unknown'}
+                                                        </div>
                                                       </SelectItem>
                                                     ))
                                                   )}
                                                 </SelectContent>
                                               </Select>
                                             </div>
-                                            <div className="space-y-2">
-                                              <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                                  <User className="h-4 w-4 text-blue-600" />
+                                            <div className="space-y-3">
+                                              <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-md">
+                                                  <User className="h-5 w-5 text-white" />
                                                 </div>
-                                                <Label htmlFor="member2" className="text-sm font-semibold text-gray-700">Panel Member 2 *</Label>
+                                                <div className="flex-1">
+                                                  <Label htmlFor="member2" className="text-sm font-semibold text-gray-900">Panel Member 2</Label>
+                                                  <p className="text-xs text-gray-500">Evaluate the research</p>
+                                                </div>
+                                                {panelists.member2 && (
+                                                  <Badge className="bg-green-100 text-green-700 border-green-200">
+                                                    <Check className="h-3 w-3 mr-1" /> Selected
+                                                  </Badge>
+                                                )}
                                               </div>
                                               <Select value={panelists.member2 || ''} onValueChange={(value) => setPanelists({...panelists, member2: value || ''})}>
-                                                <SelectTrigger className="h-11 border-gray-300 w-full">
+                                                <SelectTrigger className="h-12 border-gray-300 w-full focus:ring-2 focus:ring-blue-500">
                                                   <SelectValue placeholder="Select panel member 2" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                   {availablePanelists.length === 0 ? (
-                                                    <div className="p-2 text-sm text-gray-500">No available panelists for this schedule</div>
+                                                    <div className="p-3 text-sm text-gray-500 text-center">No available panelists for this schedule</div>
                                                   ) : (
                                                     availablePanelists.map((users) => (
                                                       <SelectItem key={users.id} value={users.fullname || users.name || users.username || ''}>
-                                                        {users.fullname || users.name || users.username || 'Unknown'}
+                                                        <div className="flex items-center gap-2">
+                                                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
+                                                            <User className="h-3 w-3 text-blue-600" />
+                                                          </div>
+                                                          {users.fullname || users.name || users.username || 'Unknown'}
+                                                        </div>
                                                       </SelectItem>
                                                     ))
                                                   )}
@@ -1449,10 +1559,10 @@ export default function AdminDashboard() {
                                         </div>
                                       </div>
                                     </div>
-                                    <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-4">
+                                    <DialogFooter className="flex-col sm:flex-row gap-3 sm:gap-4 pt-4 border-t border-gray-200">
                                       <Button
                                         variant="outline"
-                                        className="flex-1 h-11 border-gray-300 hover:bg-gray-50 w-full sm:w-auto"
+                                        className="flex-1 h-12 border-gray-300 hover:bg-gray-50 w-full sm:w-auto text-sm font-medium"
                                         onClick={() => {
                                           setSelectedAppointment(null);
                                           setPanelists({ chairman: "", member1: "", member2: "" });
@@ -1464,12 +1574,13 @@ export default function AdminDashboard() {
                                       >
                                         Cancel
                                       </Button>
-                                      <div
-                                        className={`inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white w-full sm:w-auto ${
+                                      <Button
+                                        className={`flex-1 h-12 w-full sm:w-auto text-sm font-medium shadow-lg transition-all ${
                                           !panelists.chairman || !panelists.member1 || !panelists.member2
                                             ? "bg-gray-400 cursor-not-allowed"
-                                            : "bg-green-500 hover:bg-green-600 cursor-pointer"
+                                            : "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
                                         }`}
+                                        disabled={!panelists.chairman || !panelists.member1 || !panelists.member2}
                                         onClick={() => {
                                           if (panelists.chairman && panelists.member1 && panelists.member2) {
                                             handleApproveWithPanelists(selectedAppointment?.id || '');
@@ -1477,8 +1588,8 @@ export default function AdminDashboard() {
                                           }
                                         }}
                                       >
-                                        <Check className="h-4 w-4 mr-1" /> Approve & Assign Panel
-                                      </div>
+                                        <Check className="h-4 w-4 mr-2" /> Approve & Assign Panel
+                                      </Button>
                                     </DialogFooter>
                                   </DialogContent>
                                 </Dialog>
