@@ -175,6 +175,7 @@ export default function AdminDashboard() {
   const [appointmentsPanelists, setAppointmentsPanelists] = useState<Record<string, any[]>>({});
   const [users, setUsers] = useState<any[]>([]);
   const [panelUsers, setPanelUsers] = useState<any[]>([]);
+  const [availablePanelists, setAvailablePanelists] = useState<any[]>([]);
   const [panelistStats, setPanelistStats] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
@@ -279,6 +280,27 @@ export default function AdminDashboard() {
       fetchPanelistStats();
     }
   }, [activeTab, user]);
+
+  useEffect(() => {
+    const filterAvailablePanelists = async () => {
+      if (isApproveDialogOpen && selectedAppointment && panelUsers.length > 0) {
+        const available = await Promise.all(
+          panelUsers.map(async (panelUser) => {
+            const isAvailable = await checkPanelistAvailability(
+              panelUser.fullname || panelUser.name || panelUser.username || '',
+              selectedAppointment.date,
+              selectedAppointment.time_desc
+            );
+            return { ...panelUser, isAvailable };
+          })
+        );
+        setAvailablePanelists(available.filter(p => p.isAvailable));
+      } else {
+        setAvailablePanelists(panelUsers);
+      }
+    };
+    filterAvailablePanelists();
+  }, [isApproveDialogOpen, selectedAppointment, panelUsers]);
 
   useEffect(() => {
     if (rescheduleDate && rescheduleRoom && user) {
@@ -480,6 +502,38 @@ export default function AdminDashboard() {
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to reschedule";
       toast.error(message);
+    }
+  };
+
+  const checkPanelistAvailability = async (panelistName: string, appointmentDate: string, appointmentTime: string): Promise<boolean> => {
+    try {
+      // Fetch all panelist records for this panelist
+      const panelistsResponse = await fetch('/api/panelists');
+      if (!panelistsResponse.ok) return true; // If error, assume available
+
+      const allPanelists = await panelistsResponse.json();
+      const panelistRecords = allPanelists.filter((p: any) => p.name === panelistName);
+
+      // Get group codes for this panelist
+      const groupCodes = panelistRecords.map((p: any) => p.group_code);
+
+      // Fetch appointments for these group codes
+      const appointmentsResponse = await fetch('/api/appointments');
+      if (!appointmentsResponse.ok) return true; // If error, assume available
+
+      const allAppointments = await appointmentsResponse.json();
+      const conflictingAppointments = allAppointments.filter((apt: any) =>
+        groupCodes.includes(apt.group_code) &&
+        apt.date === appointmentDate &&
+        apt.time_desc === appointmentTime &&
+        apt.status !== 'NOT APPROVED' &&
+        apt.status !== 'COMPLETED'
+      );
+
+      return conflictingAppointments.length === 0;
+    } catch (error) {
+      console.error('Error checking panelist availability:', error);
+      return true; // If error, assume available
     }
   };
 
@@ -1325,10 +1379,10 @@ export default function AdminDashboard() {
                                                 <SelectValue placeholder="Select panel chairman" />
                                               </SelectTrigger>
                                               <SelectContent>
-                                                {panelUsers.length === 0 ? (
-                                                  <div className="p-2 text-sm text-gray-500">No panel users available</div>
+                                                {availablePanelists.length === 0 ? (
+                                                  <div className="p-2 text-sm text-gray-500">No available panelists for this schedule</div>
                                                 ) : (
-                                                  panelUsers.map((users) => (
+                                                  availablePanelists.map((users) => (
                                                     <SelectItem key={users.id} value={users.fullname || users.name || users.username || ''}>
                                                       {users.fullname || users.name || users.username || 'Unknown'}
                                                     </SelectItem>
@@ -1352,10 +1406,10 @@ export default function AdminDashboard() {
                                                   <SelectValue placeholder="Select panel member 1" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                  {panelUsers.length === 0 ? (
-                                                    <div className="p-2 text-sm text-gray-500">No panel users available</div>
+                                                  {availablePanelists.length === 0 ? (
+                                                    <div className="p-2 text-sm text-gray-500">No available panelists for this schedule</div>
                                                   ) : (
-                                                    panelUsers.map((users) => (
+                                                    availablePanelists.map((users) => (
                                                       <SelectItem key={users.id} value={users.fullname || users.name || users.username || ''}>
                                                         {users.fullname || users.name || users.username || 'Unknown'}
                                                       </SelectItem>
@@ -1376,10 +1430,10 @@ export default function AdminDashboard() {
                                                   <SelectValue placeholder="Select panel member 2" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                  {panelUsers.length === 0 ? (
-                                                    <div className="p-2 text-sm text-gray-500">No panel users available</div>
+                                                  {availablePanelists.length === 0 ? (
+                                                    <div className="p-2 text-sm text-gray-500">No available panelists for this schedule</div>
                                                   ) : (
-                                                    panelUsers.map((users) => (
+                                                    availablePanelists.map((users) => (
                                                       <SelectItem key={users.id} value={users.fullname || users.name || users.username || ''}>
                                                         {users.fullname || users.name || users.username || 'Unknown'}
                                                       </SelectItem>
