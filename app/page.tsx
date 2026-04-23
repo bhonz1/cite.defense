@@ -146,22 +146,35 @@ export default function LandingPage() {
         fetch('/api/appointments?status=PENDING')
       ]);
 
+      console.log('Approved response:', approvedRes.ok);
+      console.log('Pending response:', pendingRes.ok);
+
       if (approvedRes.ok && pendingRes.ok) {
         const approvedData = await approvedRes.json();
         const pendingData = await pendingRes.json();
+        console.log('Approved data:', approvedData);
+        console.log('Pending data:', pendingData);
         setAppointments([...approvedData, ...pendingData]);
         setLastUpdated(new Date());
       } else if (approvedRes.ok) {
         const data = await approvedRes.json();
+        console.log('Approved data only:', data);
         setAppointments(data);
         setLastUpdated(new Date());
       } else if (pendingRes.ok) {
         const data = await pendingRes.json();
+        console.log('Pending data only:', data);
         setAppointments(data);
+        setLastUpdated(new Date());
+      } else {
+        console.log('No appointments found, setting empty array');
+        setAppointments([]);
         setLastUpdated(new Date());
       }
     } catch (error) {
       console.error('Failed to fetch appointments:', error);
+      setAppointments([]);
+      setLastUpdated(new Date());
     } finally {
       setIsLoading(false);
     }
@@ -180,19 +193,25 @@ export default function LandingPage() {
     return !getScheduledDefense(date, timeSlot, room);
   };
 
-  // Extract unique dates from appointments
-  const defenseDates = appointments.reduce((acc: any[], apt) => {
-    const exists = acc.find(d => d.date === apt.date);
-    if (!exists) {
-      const dateObj = new Date(apt.date);
-      acc.push({
-        date: apt.date,
-        label: dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-        type: `${apt.research_type} - ${apt.defense_type}`
-      });
-    }
-    return acc;
-  }, []).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  // Extract unique dates from appointments, with fallback dates if empty
+  const defenseDates = appointments.length > 0
+    ? appointments.reduce((acc: any[], apt) => {
+        const exists = acc.find(d => d.date === apt.date);
+        if (!exists) {
+          const dateObj = new Date(apt.date);
+          acc.push({
+            date: apt.date,
+            label: dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+            type: `${apt.research_type} - ${apt.defense_type}`
+          });
+        }
+        return acc;
+      }, []).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    : [
+        { date: "2026-05-08", label: "May 8, 2026", type: "THESIS - FINAL" },
+        { date: "2026-05-11", label: "May 11, 2026", type: "CAPSTONE - PROPOSAL" },
+        { date: "2026-05-12", label: "May 12, 2026", type: "CAPSTONE - PROPOSAL" },
+      ];
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
