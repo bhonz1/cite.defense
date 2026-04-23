@@ -9,7 +9,10 @@ export async function POST(request: Request) {
     const supabase = createClient(cookieStore);
     const { username, password } = await request.json();
 
+    console.log('Login attempt for username:', username);
+
     if (!username || !password) {
+      console.log('Missing username or password');
       return NextResponse.json(
         { error: 'Username and password are required' },
         { status: 400 }
@@ -23,16 +26,24 @@ export async function POST(request: Request) {
       .eq('username', username)
       .single();
 
+    console.log('User query result:', { user, error });
+
     if (error || !user) {
+      console.log('User not found or database error:', error);
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 }
       );
     }
 
+    console.log('User found:', { id: user.id, username: user.username, name: user.name, role: user.role });
+
     // Check password using bcrypt
     const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Password validation result:', isPasswordValid);
+
     if (!isPasswordValid) {
+      console.log('Invalid password');
       return NextResponse.json(
         { error: 'Invalid username or password' },
         { status: 401 }
