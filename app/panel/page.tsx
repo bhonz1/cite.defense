@@ -94,13 +94,13 @@ export default function PanelDashboard() {
         const session = parseSessionCookie();
         console.log('Panel session:', session);
         if (!session) {
-          console.log('No session found, redirecting to login');
-          router.push("/auth/login");
+          console.log('No session found, redirecting to panel login');
+          router.push("/auth/panel-login");
           return;
         }
         if (session.role !== "PANEL") {
-          console.log('Invalid role:', session.role, 'redirecting to student');
-          router.push("/student");
+          console.log('Invalid role:', session.role, 'redirecting to panel login');
+          router.push("/auth/panel-login");
           return;
         }
         console.log('Session valid, setting user');
@@ -110,7 +110,7 @@ export default function PanelDashboard() {
         fetchAssignedAppointments(session.name || session.username || "");
       } catch (error) {
         console.error("Auth error:", error);
-        router.push("/auth/login");
+        router.push("/auth/panel-login");
       } finally {
         setAuthLoading(false);
       }
