@@ -64,36 +64,9 @@ export async function GET(request: Request) {
 
     console.log('GET appointments - All params:', { acadYear, researchType, defenseType, status, studentName, trackingNumber });
 
-    // Allow public access for tracking by tracking number
-    // Only require authentication for admin operations (not tracking)
-    if (!trackingNumber) {
-      console.log('No tracking number, checking authentication...');
-      // Get user from session to check auth
-      let isAuthenticated = false;
-
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) isAuthenticated = true;
-      } catch (authError) {
-        console.error('Supabase auth error:', authError);
-      }
-
-      // Fallback: Check custom session cookie
-      if (!isAuthenticated) {
-        const session = await parseSessionCookie(cookieStore);
-        if (session) isAuthenticated = true;
-      }
-
-      if (!isAuthenticated) {
-        console.log('Authentication failed, returning 401');
-        return NextResponse.json(
-          { error: 'Authentication required' },
-          { status: 401 }
-        );
-      }
-    } else {
-      console.log('Tracking number present, skipping authentication check');
-    }
+    // Allow public access for GET requests (landing page, tracking)
+    // Only require authentication for POST/PUT/DELETE operations
+    console.log('Public access allowed for GET requests');
 
     let query = supabase
       .from('appointments')

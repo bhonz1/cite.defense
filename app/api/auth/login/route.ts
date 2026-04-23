@@ -83,8 +83,8 @@ export async function POST(request: Request) {
     // Set the session cookie
     response.cookies.set('session', sessionToken, {
       httpOnly: false,
-      secure: true, // Always use secure for HTTPS
-      sameSite: 'none', // Required for cross-origin/subdomain scenarios
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', // Better compatibility across devices
       maxAge: 60 * 60 * 24, // 24 hours
       path: '/',
     });
