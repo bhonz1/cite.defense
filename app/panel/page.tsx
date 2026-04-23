@@ -49,7 +49,6 @@ export default function PanelDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [panelistRecords, setPanelistRecords] = useState<Panelist[]>([]);
 
   const toggleRow = (id: string) => {
     setExpandedRows(prev => {
@@ -168,12 +167,8 @@ export default function PanelDashboard() {
       if (!panelistRecords || panelistRecords.length === 0) {
         console.log('No panelist records found for:', panelistName);
         setAppointments([]);
-        setPanelistRecords([]);
         return;
       }
-
-      // Store panelist records for display
-      setPanelistRecords(panelistRecords);
 
       // Extract unique group codes
       const groupCodes = [...new Set(panelistRecords.map((p: Panelist) => p.group_code))];
@@ -271,7 +266,7 @@ export default function PanelDashboard() {
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-4">
-            {["dashboard", "panelist", "evaluate", "verdict"].map((tab) => (
+            {["dashboard", "evaluate", "verdict"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -358,58 +353,6 @@ export default function PanelDashboard() {
                               {appointment.status}
                             </Badge>
                           </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === "panelist" && (
-          <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-md">
-            <CardHeader className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 text-white">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl font-bold">My Panelist Records</CardTitle>
-                <Badge className="bg-white/20 text-white border-white/30">
-                  {panelistRecords.length} Record{panelistRecords.length !== 1 ? "s" : ""}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              {isLoading ? (
-                <div className="p-8 text-center text-gray-500">Loading...</div>
-              ) : panelistRecords.length === 0 ? (
-                <div className="p-8 text-center">
-                  <Shield className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500">No panelist records found</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader className="bg-gradient-to-r from-orange-50 to-red-50 border-b-2 border-orange-200">
-                      <TableRow>
-                        <TableHead className="font-bold text-gray-900">Name</TableHead>
-                        <TableHead className="font-bold text-gray-900">Role</TableHead>
-                        <TableHead className="font-bold text-gray-900">Group Code</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {panelistRecords.map((panelist, index) => (
-                        <TableRow key={index} className="hover:bg-orange-50 transition-colors">
-                          <TableCell className="font-medium text-gray-900">{panelist.name}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline" className={`text-xs ${
-                              panelist.role === 'CHAIRMAN'
-                                ? 'bg-orange-100 text-orange-700 border-orange-200 font-semibold'
-                                : 'bg-blue-100 text-blue-700 border-blue-200 font-semibold'
-                            }`}>
-                              {panelist.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-gray-700">{panelist.group_code}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

@@ -21,12 +21,6 @@ interface Appointment {
   defense_type: string;
 }
 
-const defenseDates = [
-  { date: "2026-05-08", label: "May 8, 2026", type: "THESIS - FINAL" },
-  { date: "2026-05-11", label: "May 11, 2026", type: "CAPSTONE - PROPOSAL" },
-  { date: "2026-05-12", label: "May 12, 2026", type: "CAPSTONE - PROPOSAL" },
-];
-
 const timeSlots = [
   "08:00 AM - 10:00 AM",
   "10:00 AM - 12:00 PM",
@@ -174,9 +168,9 @@ export default function LandingPage() {
   };
 
   const getScheduledDefense = (date: string, timeSlot: string, room: string) => {
-    return appointments.find(apt => 
-      apt.date === date && 
-      apt.time_desc === timeSlot && 
+    return appointments.find(apt =>
+      apt.date === date &&
+      apt.time_desc === timeSlot &&
       apt.room === room &&
       (apt.status === 'APPROVED' || apt.status === 'PENDING')
     );
@@ -185,6 +179,20 @@ export default function LandingPage() {
   const isSlotAvailable = (date: string, timeSlot: string, room: string) => {
     return !getScheduledDefense(date, timeSlot, room);
   };
+
+  // Extract unique dates from appointments
+  const defenseDates = appointments.reduce((acc: any[], apt) => {
+    const exists = acc.find(d => d.date === apt.date);
+    if (!exists) {
+      const dateObj = new Date(apt.date);
+      acc.push({
+        date: apt.date,
+        label: dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        type: `${apt.research_type} - ${apt.defense_type}`
+      });
+    }
+    return acc;
+  }, []).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
