@@ -989,8 +989,8 @@ export default function AdminDashboard() {
                                                   <div className="p-2 text-sm text-gray-500">No panel users available</div>
                                                 ) : (
                                                   panelUsers.map((user) => (
-                                                    <SelectItem key={user.id} value={user.name || user.username || ''}>
-                                                      {user.name || user.username || 'Unknown'}
+                                                    <SelectItem key={user.id} value={user.fullname || user.name || user.username || ''}>
+                                                      {user.fullname || user.name || user.username || 'Unknown'}
                                                     </SelectItem>
                                                   ))
                                                 )}
@@ -1016,8 +1016,8 @@ export default function AdminDashboard() {
                                                     <div className="p-2 text-sm text-gray-500">No panel users available</div>
                                                   ) : (
                                                     panelUsers.map((user) => (
-                                                      <SelectItem key={user.id} value={user.name || user.username || ''}>
-                                                        {user.name || user.username || 'Unknown'}
+                                                      <SelectItem key={user.id} value={user.fullname || user.name || user.username || ''}>
+                                                        {user.fullname || user.name || user.username || 'Unknown'}
                                                       </SelectItem>
                                                     ))
                                                   )}
@@ -1040,8 +1040,8 @@ export default function AdminDashboard() {
                                                     <div className="p-2 text-sm text-gray-500">No panel users available</div>
                                                   ) : (
                                                     panelUsers.map((user) => (
-                                                      <SelectItem key={user.id} value={user.name || user.username || ''}>
-                                                        {user.name || user.username || 'Unknown'}
+                                                      <SelectItem key={user.id} value={user.fullname || user.name || user.username || ''}>
+                                                        {user.fullname || user.name || user.username || 'Unknown'}
                                                       </SelectItem>
                                                     ))
                                                   )}
