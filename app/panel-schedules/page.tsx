@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, User, Shield, Calendar as CalendarIcon, Clock, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { GraduationCap, User, Shield, Calendar as CalendarIcon, Clock, Loader2, X, FileText, Users, UserCheck } from "lucide-react";
 import { format } from "date-fns";
 
 interface PanelistStat {
@@ -18,6 +19,28 @@ interface PanelistStat {
     date: string;
     time: string;
     researchType: string;
+  }>;
+}
+
+interface Appointment {
+  id: string;
+  appointment_code: string;
+  research_title: string;
+  group_code: string;
+  date: string;
+  time_desc: string;
+  room: string;
+  status: string;
+  research_type: string;
+  defense_type: string;
+  acad_year: string;
+  adviser_name?: string;
+  students?: Array<{
+    student_id: string;
+    name: string;
+    email: string;
+    course_section: string;
+    role: string;
   }>;
 }
 
@@ -98,6 +121,9 @@ function Navigation() {
 export default function PanelSchedules() {
   const [panelistStats, setPanelistStats] = useState<PanelistStat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   useEffect(() => {
     const fetchPanelistStats = async () => {
@@ -119,6 +145,7 @@ export default function PanelSchedules() {
           return;
         }
         const appointmentsData = await appointmentsResponse.json();
+        setAppointments(appointmentsData);
 
         // Create a map of group_code to research_type and schedule
         const groupCodeInfo: Record<string, { researchType: string; date: string; time: string }> = {};
@@ -189,6 +216,20 @@ export default function PanelSchedules() {
     fetchPanelistStats();
   }, []);
 
+  const handleGroupCodeClick = (groupCode: string) => {
+    const appointment = appointments.find(apt => apt.group_code === groupCode);
+    if (appointment) {
+      setSelectedAppointment(appointment);
+      setIsModalOpen(true);
+    }
+  };
+
+  const getResearchTypeColor = (type: string) => {
+    return type === 'THESIS' 
+      ? 'bg-blue-100 text-blue-700 border-blue-200' 
+      : 'bg-purple-100 text-purple-700 border-purple-200';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-red-50">
       <Navigation />
@@ -247,11 +288,15 @@ export default function PanelSchedules() {
                         <div className="flex flex-col gap-2">
                           {stat.groupCodes.map((gc, idx) => (
                             <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                              <Badge variant="outline" className={`text-xs font-semibold flex-shrink-0 ${
-                                gc.researchType === 'THESIS'
-                                  ? 'bg-blue-100 text-blue-700 border-blue-200'
-                                  : 'bg-purple-100 text-purple-700 border-purple-200'
-                              }`}>
+                              <Badge 
+                                variant="outline" 
+                                className={`text-xs font-semibold flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity ${
+                                  gc.researchType === 'THESIS'
+                                    ? 'bg-blue-100 text-blue-700 border-blue-200'
+                                    : 'bg-purple-100 text-purple-700 border-purple-200'
+                                }`}
+                                onClick={() => handleGroupCodeClick(gc.code)}
+                              >
                                 {gc.code}
                               </Badge>
                               <Badge variant="outline" className={`text-xs font-semibold flex-shrink-0 ${
@@ -281,6 +326,119 @@ export default function PanelSchedules() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Appointment Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold text-gray-900">Appointment Details</DialogTitle>
+                  <p className="text-sm text-gray-600 mt-1">{selectedAppointment?.group_code}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+          </DialogHeader>
+
+          {selectedAppointment && (
+            <div className="space-y-6 py-4">
+              {/* Research Title */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileText className="h-4 w-4 text-orange-500" />
+                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Research Title</span>
+                </div>
+                <p className="text-gray-900 font-semibold">{selectedAppointment.research_title}</p>
+                <div className="flex items-center gap-3 mt-3 flex-wrap">
+                  <Badge className={`font-semibold ${getResearchTypeColor(selectedAppointment.research_type)}`}>
+                    {selectedAppointment.research_type}
+                  </Badge>
+                  <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
+                    {selectedAppointment.defense_type}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Schedule Information */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CalendarIcon className="h-4 w-4 text-orange-500" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Date</span>
+                  </div>
+                  <p className="text-gray-900 font-semibold">
+                    {selectedAppointment.date ? format(new Date(selectedAppointment.date), 'MMM dd, yyyy') : 'N/A'}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-orange-400" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Time</span>
+                  </div>
+                  <p className="text-gray-900 font-semibold">{selectedAppointment.time_desc}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Room</span>
+                  </div>
+                  <p className="text-gray-900 font-semibold">{selectedAppointment.room}</p>
+                </div>
+              </div>
+
+              {/* Adviser */}
+              {selectedAppointment.adviser_name && (
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserCheck className="h-4 w-4 text-blue-600" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Adviser</span>
+                  </div>
+                  <p className="text-gray-900 font-semibold">{selectedAppointment.adviser_name}</p>
+                </div>
+              )}
+
+              {/* Group Members */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Users className="h-4 w-4 text-orange-500" />
+                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Group Members</span>
+                </div>
+                <div className="space-y-2">
+                  {selectedAppointment.students && selectedAppointment.students.length > 0 ? (
+                    selectedAppointment.students.map((student, idx) => (
+                      <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-900">{student.name}</div>
+                            <div className="text-sm text-gray-600 mt-1">{student.student_id} • {student.course_section}</div>
+                          </div>
+                          <Badge variant="outline" className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border-blue-200 font-semibold flex-shrink-0">
+                            {student.role}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">
+                      No group members information available
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
