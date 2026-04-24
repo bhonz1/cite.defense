@@ -329,7 +329,7 @@ export default function PanelSchedules() {
 
       {/* Appointment Details Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -351,63 +351,66 @@ export default function PanelSchedules() {
           </DialogHeader>
 
           {selectedAppointment && (
-            <div className="space-y-6 py-4">
-              {/* Research Title */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
-                <div className="flex items-center gap-2 mb-3">
-                  <FileText className="h-4 w-4 text-orange-500" />
-                  <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Research Title</span>
-                </div>
-                <p className="text-gray-900 font-semibold">{selectedAppointment.research_title}</p>
-                <div className="flex items-center gap-3 mt-3 flex-wrap">
-                  <Badge className={`font-semibold ${getResearchTypeColor(selectedAppointment.research_type)}`}>
-                    {selectedAppointment.research_type}
-                  </Badge>
-                  <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
-                    {selectedAppointment.defense_type}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Schedule Information */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CalendarIcon className="h-4 w-4 text-orange-500" />
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Date</span>
-                  </div>
-                  <p className="text-gray-900 font-semibold">
-                    {selectedAppointment.date ? format(new Date(selectedAppointment.date), 'MMM dd, yyyy') : 'N/A'}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4 text-orange-400" />
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Time</span>
-                  </div>
-                  <p className="text-gray-900 font-semibold">{selectedAppointment.time_desc}</p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-4 w-4 text-blue-600" />
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Room</span>
-                  </div>
-                  <p className="text-gray-900 font-semibold">{selectedAppointment.room}</p>
-                </div>
-              </div>
-
-              {/* Adviser */}
-              {selectedAppointment.adviser_name && (
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-4">
+              {/* Left Column */}
+              <div className="space-y-6">
+                {/* Research Title */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
                   <div className="flex items-center gap-2 mb-3">
-                    <UserCheck className="h-4 w-4 text-blue-600" />
-                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Adviser</span>
+                    <FileText className="h-4 w-4 text-orange-500" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Research Title</span>
                   </div>
-                  <p className="text-gray-900 font-semibold">{selectedAppointment.adviser_name}</p>
+                  <p className="text-gray-900 font-semibold">{selectedAppointment.research_title}</p>
+                  <div className="flex items-center gap-3 mt-3 flex-wrap">
+                    <Badge className={`font-semibold ${getResearchTypeColor(selectedAppointment.research_type)}`}>
+                      {selectedAppointment.research_type}
+                    </Badge>
+                    <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
+                      {selectedAppointment.defense_type}
+                    </Badge>
+                  </div>
                 </div>
-              )}
 
-              {/* Group Members */}
+                {/* Schedule Information */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CalendarIcon className="h-4 w-4 text-orange-500" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Date</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">
+                      {selectedAppointment.date ? format(new Date(selectedAppointment.date), 'MMM dd, yyyy') : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="h-4 w-4 text-orange-400" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Time</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">{selectedAppointment.time_desc}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="h-4 w-4 text-blue-600" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Room</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">{selectedAppointment.room}</p>
+                  </div>
+                </div>
+
+                {/* Adviser */}
+                {selectedAppointment.adviser_name && (
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <UserCheck className="h-4 w-4 text-blue-600" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Adviser</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">{selectedAppointment.adviser_name}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column - Group Members */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Users className="h-4 w-4 text-orange-500" />
