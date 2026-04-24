@@ -492,7 +492,7 @@ export default function AdminDashboard() {
       }
 
       // Update appointment status to APPROVED after panelists are assigned
-      await updateAppointment("", appointmentId, { status: "APPROVED" });
+      await updateAppointment("", appointment.id, { status: "APPROVED" });
 
       toast.success("Appointment approved and panelists assigned");
       setSelectedAppointment(null);
