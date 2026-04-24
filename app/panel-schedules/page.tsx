@@ -92,6 +92,16 @@ function Navigation() {
               SCHEDULE
             </Link>
             <Link 
+              href="/defense-schedule" 
+              className={`font-medium transition-colors ${
+                isActive("/defense-schedule") 
+                  ? "text-orange-600" 
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              CALENDAR
+            </Link>
+            <Link 
               href="/panel-schedules" 
               className={`font-medium transition-colors ${
                 isActive("/panel-schedules") 
