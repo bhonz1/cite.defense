@@ -163,6 +163,8 @@ export default function AdminDashboard() {
     defenseType: "All",
   });
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointmentForModal, setSelectedAppointmentForModal] = useState<Appointment | null>(null);
+  const [isAppointmentModalOpen, setIsAppointmentModalOpen] = useState(false);
   const [rescheduleDate, setRescheduleDate] = useState<Date | undefined>(undefined);
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [rescheduleRoom, setRescheduleRoom] = useState("");
@@ -391,10 +393,17 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleApproveWithPanelists = async (appointmentId: string) => {
+  const handleGroupCodeClick = (groupCode: string) => {
+    const appointment = appointments.find(apt => apt.group_code === groupCode);
+    if (appointment) {
+      setSelectedAppointmentForModal(appointment);
+      setIsAppointmentModalOpen(true);
+    }
+  };
+
+  const handleApproveWithPanelists = async (groupCode: string) => {
     try {
-      // Get the appointment to get the group_code
-      const appointment = appointments.find(apt => apt.id === appointmentId);
+      const appointment = appointments.find(apt => apt.group_code === groupCode);
       if (!appointment) {
         throw new Error('Appointment not found');
       }
@@ -1221,7 +1230,10 @@ export default function AdminDashboard() {
                               <div className="font-bold text-gray-900 text-sm leading-tight line-clamp-2">{appointment.research_title}</div>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs text-gray-500 font-medium">{appointment.acad_year}</span>
-                                <span className="text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white px-2.5 py-1 rounded-full font-semibold shadow-sm">
+                                <span 
+                                  className="text-xs bg-gradient-to-r from-orange-500 to-red-500 text-white px-2.5 py-1 rounded-full font-semibold shadow-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                  onClick={() => handleGroupCodeClick(appointment.group_code)}
+                                >
                                   {appointment.group_code}
                                 </span>
                               </div>
@@ -2131,6 +2143,106 @@ export default function AdminDashboard() {
                 Save Changes
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Appointment Details Modal */}
+        <Dialog open={isAppointmentModalOpen} onOpenChange={setIsAppointmentModalOpen}>
+          <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold text-gray-900">Appointment Details</DialogTitle>
+                  <p className="text-sm text-gray-600 mt-1">{selectedAppointmentForModal?.group_code}</p>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {selectedAppointmentForModal && (
+              <div className="space-y-6 py-4">
+                {/* Research Title */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="h-4 w-4 text-orange-500" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Research Title</span>
+                  </div>
+                  <p className="text-gray-900 font-semibold">{selectedAppointmentForModal.research_title}</p>
+                  <div className="flex items-center gap-3 mt-3 flex-wrap">
+                    <Badge className={`font-semibold ${
+                      selectedAppointmentForModal.research_type === 'THESIS'
+                        ? 'bg-blue-100 text-blue-700 border-blue-200'
+                        : 'bg-purple-100 text-purple-700 border-purple-200'
+                    }`}>
+                      {selectedAppointmentForModal.research_type}
+                    </Badge>
+                    <Badge variant="outline" className="bg-gray-100 text-gray-700 border-gray-200">
+                      {selectedAppointmentForModal.defense_type}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Schedule Information */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CalendarIcon className="h-4 w-4 text-orange-500" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Date</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">
+                      {selectedAppointmentForModal.date ? format(new Date(selectedAppointmentForModal.date), 'MMM dd, yyyy') : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="h-4 w-4 text-orange-400" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Time</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">{selectedAppointmentForModal.time_desc}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MapPin className="h-4 w-4 text-blue-600" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Room</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">{selectedAppointmentForModal.room}</p>
+                  </div>
+                </div>
+
+                {/* Adviser */}
+                {selectedAppointmentForModal.adviser_name && (
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <User className="h-4 w-4 text-blue-600" />
+                      <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Adviser</span>
+                    </div>
+                    <p className="text-gray-900 font-semibold">{selectedAppointmentForModal.adviser_name}</p>
+                  </div>
+                )}
+
+                {/* Student Information */}
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="h-4 w-4 text-orange-500" />
+                    <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Student Information</span>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Student Name</p>
+                        <p className="text-gray-900 font-semibold">{selectedAppointmentForModal.student_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Student Email</p>
+                        <p className="text-gray-900 font-semibold">{selectedAppointmentForModal.student_email}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>
