@@ -596,22 +596,19 @@ export default function AdminDashboard() {
         };
       });
 
-      // Group panelists by name and research type
+      // Group panelists by name only (merge Thesis and Capstone)
       const stats = panelistsData.reduce((acc: any, panelist: any) => {
         const name = panelist.name;
         const info = groupCodeInfo[panelist.group_code] || { researchType: 'UNKNOWN', date: '', time: '' };
-        const researchType = info.researchType;
-        const key = `${name}_${researchType}`;
+        const key = name;
 
         if (!acc[key]) {
           acc[key] = {
             name: name,
-            role: panelist.role,
-            researchType: researchType,
             totalAppointments: 0,
             chairmanCount: 0,
             memberCount: 0,
-            groupCodes: [] as Array<{ code: string; date: string; time: string }>
+            groupCodes: [] as Array<{ code: string; date: string; time: string; researchType: string }>
           };
         }
         acc[key].totalAppointments += 1;
@@ -624,7 +621,8 @@ export default function AdminDashboard() {
           acc[key].groupCodes.push({
             code: panelist.group_code,
             date: info.date,
-            time: info.time
+            time: info.time,
+            researchType: info.researchType
           });
         }
         return acc;
@@ -1061,154 +1059,63 @@ export default function AdminDashboard() {
                     <p className="text-gray-500">No panelist data available</p>
                   </div>
                 ) : (
-                  <div className="space-y-8">
-                    {/* THESIS Section */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                          <BookOpen className="h-4 w-4 text-white" />
-                        </div>
-                        <h4 className="text-xl font-bold text-gray-900">THESIS</h4>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {panelistStats
-                          .filter((stat: any) => stat.researchType === 'THESIS')
-                          .map((stat: any, index: number) => (
-                            <Card key={index} className="border-gray-200 hover:shadow-lg transition-all">
-                              <CardContent className="p-4">
-                                <div className="flex items-start gap-3 mb-4">
-                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    stat.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {panelistStats.map((stat: any, index: number) => (
+                      <Card key={index} className="border-gray-200 hover:shadow-lg transition-all">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center flex-shrink-0">
+                              <User className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-bold text-gray-900 text-lg">{stat.name}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs text-gray-500">Chairman: {stat.chairmanCount}</span>
+                                <span className="text-xs text-gray-500">•</span>
+                                <span className="text-xs text-gray-500">Member: {stat.memberCount}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
+                              <span className="text-sm text-gray-600">Total Appointments</span>
+                              <span className="font-bold text-gray-900">{stat.totalAppointments}</span>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-2">Group Codes & Schedule:</p>
+                            <div className="flex flex-col gap-2">
+                              {stat.groupCodes.map((gc: { code: string; date: string; time: string; researchType: string }, idx: number) => (
+                                <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                  <Badge variant="outline" className={`text-xs font-semibold flex-shrink-0 ${
+                                    gc.researchType === 'THESIS'
+                                      ? 'bg-blue-100 text-blue-700 border-blue-200'
+                                      : 'bg-purple-100 text-purple-700 border-purple-200'
                                   }`}>
-                                    <User className="h-6 w-6 text-white" />
-                                  </div>
-                                  <div className="flex-1">
-                                    <h4 className="font-bold text-gray-900 text-lg">{stat.name}</h4>
-                                    <Badge variant="outline" className={`text-xs mt-1 ${
-                                      stat.role === 'CHAIRMAN' 
-                                        ? 'bg-orange-100 text-orange-700 border-orange-200 font-semibold' 
-                                        : 'bg-blue-100 text-blue-700 border-blue-200 font-semibold'
-                                    }`}>
-                                      {stat.role}
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <div className="space-y-3">
-                                  <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
-                                    <span className="text-sm text-gray-600">Total Appointments</span>
-                                    <span className="font-bold text-gray-900">{stat.totalAppointments}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center bg-orange-50 rounded-lg p-3">
-                                    <span className="text-sm text-gray-600">As Chairman</span>
-                                    <span className="font-bold text-orange-700">{stat.chairmanCount}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center bg-blue-50 rounded-lg p-3">
-                                    <span className="text-sm text-gray-600">As Member</span>
-                                    <span className="font-bold text-blue-700">{stat.memberCount}</span>
-                                  </div>
-                                </div>
-                                <div className="mt-3 pt-3 border-t border-gray-200">
-                                  <p className="text-xs text-gray-500 mb-2">Group Codes & Schedule:</p>
-                                  <div className="flex flex-col gap-2">
-                                    {stat.groupCodes.map((gc: { code: string; date: string; time: string }, idx: number) => (
-                                      <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                                        <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-200 font-semibold flex-shrink-0">
-                                          {gc.code}
-                                        </Badge>
-                                        <div className="flex items-center gap-1 text-xs text-gray-600">
-                                          <CalendarIcon className="h-3 w-3" />
-                                          <span>{gc.date ? format(new Date(gc.date), 'MMM dd, yyyy') : 'N/A'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 text-xs text-gray-600">
-                                          <Clock className="h-3 w-3" />
-                                          <span>{gc.time || 'N/A'}</span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        {panelistStats.filter((stat: any) => stat.researchType === 'THESIS').length === 0 && (
-                          <p className="text-gray-500 col-span-3 text-center py-4">No Thesis appointments assigned</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* CAPSTONE Section */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-                          <Award className="h-4 w-4 text-white" />
-                        </div>
-                        <h4 className="text-xl font-bold text-gray-900">CAPSTONE</h4>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {panelistStats
-                          .filter((stat: any) => stat.researchType === 'CAPSTONE')
-                          .map((stat: any, index: number) => (
-                            <Card key={index} className="border-gray-200 hover:shadow-lg transition-all">
-                              <CardContent className="p-4">
-                                <div className="flex items-start gap-3 mb-4">
-                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                    stat.role === 'CHAIRMAN' ? 'bg-gradient-to-br from-orange-500 to-red-500' : 'bg-gradient-to-br from-blue-500 to-indigo-500'
+                                    {gc.code}
+                                  </Badge>
+                                  <Badge variant="outline" className={`text-xs font-semibold flex-shrink-0 ${
+                                    gc.researchType === 'THESIS'
+                                      ? 'bg-blue-50 text-blue-600 border-blue-200'
+                                      : 'bg-purple-50 text-purple-600 border-purple-200'
                                   }`}>
-                                    <User className="h-6 w-6 text-white" />
+                                    {gc.researchType}
+                                  </Badge>
+                                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                                    <CalendarIcon className="h-3 w-3" />
+                                    <span>{gc.date ? format(new Date(gc.date), 'MMM dd, yyyy') : 'N/A'}</span>
                                   </div>
-                                  <div className="flex-1">
-                                    <h4 className="font-bold text-gray-900 text-lg">{stat.name}</h4>
-                                    <Badge variant="outline" className={`text-xs mt-1 ${
-                                      stat.role === 'CHAIRMAN' 
-                                        ? 'bg-orange-100 text-orange-700 border-orange-200 font-semibold' 
-                                        : 'bg-blue-100 text-blue-700 border-blue-200 font-semibold'
-                                    }`}>
-                                      {stat.role}
-                                    </Badge>
+                                  <div className="flex items-center gap-1 text-xs text-gray-600">
+                                    <Clock className="h-3 w-3" />
+                                    <span>{gc.time || 'N/A'}</span>
                                   </div>
                                 </div>
-                                <div className="space-y-3">
-                                  <div className="flex justify-between items-center bg-gray-50 rounded-lg p-3">
-                                    <span className="text-sm text-gray-600">Total Appointments</span>
-                                    <span className="font-bold text-gray-900">{stat.totalAppointments}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center bg-orange-50 rounded-lg p-3">
-                                    <span className="text-sm text-gray-600">As Chairman</span>
-                                    <span className="font-bold text-orange-700">{stat.chairmanCount}</span>
-                                  </div>
-                                  <div className="flex justify-between items-center bg-blue-50 rounded-lg p-3">
-                                    <span className="text-sm text-gray-600">As Member</span>
-                                    <span className="font-bold text-blue-700">{stat.memberCount}</span>
-                                  </div>
-                                </div>
-                                <div className="mt-3 pt-3 border-t border-gray-200">
-                                  <p className="text-xs text-gray-500 mb-2">Group Codes & Schedule:</p>
-                                  <div className="flex flex-col gap-2">
-                                    {stat.groupCodes.map((gc: { code: string; date: string; time: string }, idx: number) => (
-                                      <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg p-2 border border-gray-200">
-                                        <Badge variant="outline" className="text-xs bg-orange-100 text-orange-700 border-orange-200 font-semibold flex-shrink-0">
-                                          {gc.code}
-                                        </Badge>
-                                        <div className="flex items-center gap-1 text-xs text-gray-600">
-                                          <CalendarIcon className="h-3 w-3" />
-                                          <span>{gc.date ? format(new Date(gc.date), 'MMM dd, yyyy') : 'N/A'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 text-xs text-gray-600">
-                                          <Clock className="h-3 w-3" />
-                                          <span>{gc.time || 'N/A'}</span>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        {panelistStats.filter((stat: any) => stat.researchType === 'CAPSTONE').length === 0 && (
-                          <p className="text-gray-500 col-span-3 text-center py-4">No Capstone appointments assigned</p>
-                        )}
-                      </div>
-                    </div>
+                              ))}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 )}
               </CardContent>
