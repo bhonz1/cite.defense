@@ -331,22 +331,14 @@ export default function PanelSchedules() {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <DialogTitle className="text-xl font-bold text-gray-900">Appointment Details</DialogTitle>
-                  <p className="text-sm text-gray-600 mt-1">{selectedAppointment?.group_code}</p>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                <FileText className="h-5 w-5 text-white" />
               </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="h-5 w-5 text-gray-500" />
-              </button>
+              <div>
+                <DialogTitle className="text-xl font-bold text-gray-900">Appointment Details</DialogTitle>
+                <p className="text-sm text-gray-600 mt-1">{selectedAppointment?.group_code}</p>
+              </div>
             </div>
           </DialogHeader>
 
