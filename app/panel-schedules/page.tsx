@@ -339,7 +339,7 @@ export default function PanelSchedules() {
 
       {/* Appointment Details Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl w-full max-h-[90vh] overflow-y-auto">
           <DialogHeader className="pb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">

@@ -1276,7 +1276,7 @@ export default function AdminDashboard() {
                                       <Check className="h-3.5 w-3.5 mr-1.5" /> Approve
                                     </div>
                                   </DialogTrigger>
-                                  <DialogContent className="max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+                                  <DialogContent className="max-w-full sm:max-w-2xl md:max-w-4xl lg:max-w-5xl xl:max-w-6xl w-full max-h-[90vh] overflow-y-auto">
                                     <DialogHeader className="pb-6">
                                       <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
@@ -1551,7 +1551,7 @@ export default function AdminDashboard() {
                                     <CalendarIcon className="h-3.5 w-3.5 mr-1.5" /> Reschedule
                                   </div>
                                 </DialogTrigger>
-                                <DialogContent className="max-w-4xl w-full">
+                                <DialogContent className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl w-full">
                                   <DialogHeader className="pb-4">
                                     <DialogTitle className="text-2xl font-bold text-gray-900">Reschedule Defense</DialogTitle>
                                     <DialogDescription className="text-base text-gray-600">
@@ -1783,7 +1783,7 @@ export default function AdminDashboard() {
                       <User className="h-4 w-4 mr-1.5" /> Add User
                     </div>
                   </DialogTrigger>
-                  <DialogContent className="max-w-md">
+                  <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
                     <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 rounded-t-lg">
                       <div className="flex items-center gap-3">
                         <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -1964,7 +1964,7 @@ export default function AdminDashboard() {
 
         {/* Delete Confirmation Dialog */}
         <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
             <div className="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-t-lg">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -2008,7 +2008,7 @@ export default function AdminDashboard() {
 
         {/* Not Approve Confirmation Dialog */}
         <Dialog open={isNotApproveConfirmOpen} onOpenChange={setIsNotApproveConfirmOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
             <div className="bg-gradient-to-br from-orange-500 to-red-500 p-6 rounded-t-lg">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -2052,7 +2052,7 @@ export default function AdminDashboard() {
 
         {/* Edit User Dialog */}
         <Dialog open={isEditUserDialogOpen} onOpenChange={setIsEditUserDialogOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
             <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 rounded-t-lg">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -2148,7 +2148,7 @@ export default function AdminDashboard() {
 
         {/* Appointment Details Modal */}
         <Dialog open={isAppointmentModalOpen} onOpenChange={setIsAppointmentModalOpen}>
-          <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl w-full max-h-[90vh] overflow-y-auto">
             <DialogHeader className="pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
