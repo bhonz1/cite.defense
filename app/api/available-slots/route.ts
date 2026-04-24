@@ -3,15 +3,6 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { toApiFormat } from '@/lib/time-slots';
 
-// Hardcoded rooms
-const HARDCODED_ROOMS: { [key: string]: string } = {
-  '1': 'ITE102',
-  '2': 'DEFENSE ROOM',
-  '3': 'ITE201',
-  '4': 'ITE202',
-  '5': 'ITE203',
-};
-
 export async function GET(request: Request) {
   try {
     const cookieStore = await cookies();
@@ -19,11 +10,11 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
-    const roomId = searchParams.get('roomId');
+    const room = searchParams.get('room');
 
-    if (!date || !roomId) {
+    if (!date || !room) {
       return NextResponse.json(
-        { error: 'Date and roomId are required' },
+        { error: 'Date and room are required' },
         { status: 400 }
       );
     }
@@ -39,20 +30,11 @@ export async function GET(request: Request) {
     // Get time slots from centralized configuration
     const timeSlots = toApiFormat();
 
-    // Get room name from hardcoded list
-    const roomName = HARDCODED_ROOMS[roomId];
-    
-    if (!roomName) {
-      return NextResponse.json(timeSlots);
-    }
-
     // Get booked time slots for this date and room
-    // Use time_desc instead of time_code
-
     const { data: bookedSlots, error: slotsError } = await supabase
       .from('appointments')
       .select('time_desc')
-      .eq('room', roomName)
+      .eq('room', room)
       .in('status', ['PENDING', 'APPROVED'])
       .eq('date', date);
 

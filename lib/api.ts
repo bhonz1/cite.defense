@@ -54,5 +54,5 @@ export const getDashboardStats = (token: string) =>
   fetchApi("/api/dashboard/stats", {}, token);
 
 // Available slots
-export const getAvailableSlots = (token: string, date: string, roomId?: string) =>
-  fetchApi(`/api/available-slots?date=${date}${roomId ? `&roomId=${roomId}` : ''}`, {}, token);
+export const getAvailableSlots = (token: string, date: string, room?: string) =>
+  fetchApi(`/api/available-slots?date=${date}${room ? `&room=${encodeURIComponent(room)}` : ''}`, {}, token);

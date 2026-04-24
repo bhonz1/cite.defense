@@ -167,6 +167,7 @@ export default function AdminDashboard() {
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [rescheduleRoom, setRescheduleRoom] = useState("");
   const [availableSlots, setAvailableSlots] = useState<{ hour: number; time: string; endTime?: string; code?: string; display?: string }[]>([]);
+  const [rooms, setRooms] = useState<any[]>([]);
   const [panelists, setPanelists] = useState<{ chairman: string; member1: string; member2: string }>({
     chairman: "",
     member1: "",
@@ -302,6 +303,21 @@ export default function AdminDashboard() {
     };
     filterAvailablePanelists();
   }, [isApproveDialogOpen, selectedAppointment, panelUsers]);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch('/api/rooms');
+        if (response.ok) {
+          const roomsData = await response.json();
+          setRooms(roomsData);
+        }
+      } catch (error) {
+        console.error('Error fetching rooms:', error);
+      }
+    };
+    fetchRooms();
+  }, []);
 
   useEffect(() => {
     if (rescheduleDate && rescheduleRoom && user) {
@@ -1572,22 +1588,28 @@ export default function AdminDashboard() {
                                           Select Room
                                         </Label>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                          {["LAB 1", "LAB 2", "LAB 3", "CONFERENCE ROOM", "HALL A", "HALL B"].map((room) => (
-                                            <div
-                                              key={room}
-                                              onClick={() => setRescheduleRoom(room)}
-                                              className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                                                rescheduleRoom === room
-                                                  ? 'border-orange-500 bg-orange-50'
-                                                  : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                                              }`}
-                                            >
-                                              <div className="flex items-center gap-2">
-                                                <MapPin className="h-4 w-4 text-gray-600" />
-                                                <span className="font-medium text-gray-900">{room}</span>
+                                          {rooms.length > 0 ? (
+                                            rooms.map((room: any) => (
+                                              <div
+                                                key={room.id}
+                                                onClick={() => setRescheduleRoom(room.room)}
+                                                className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                                                  rescheduleRoom === room.room
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                              >
+                                                <div className="flex items-center gap-2">
+                                                  <MapPin className="h-4 w-4 text-gray-600" />
+                                                  <span className="font-medium text-gray-900">{room.room}</span>
+                                                </div>
                                               </div>
+                                            ))
+                                          ) : (
+                                            <div className="col-span-3 text-center py-4 text-gray-500">
+                                              No rooms available
                                             </div>
-                                          ))}
+                                          )}
                                         </div>
                                       </div>
                                     )}
