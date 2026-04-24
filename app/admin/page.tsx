@@ -1697,7 +1697,7 @@ export default function AdminDashboard() {
                         {expandedRows.has(appointment.id) && (
                           <TableRow>
                             <TableCell colSpan={5} className="py-4 px-4 bg-gray-50">
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {/* Team Members */}
                                 <div>
                                   <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Team Members</p>
@@ -1717,31 +1717,25 @@ export default function AdminDashboard() {
                                 <div>
                                   <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Research Adviser</p>
                                   {appointment.adviser_name ? (
-                                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-200 shadow-sm">
+                                    <div className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
                                       <div className="flex items-center gap-2">
-                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
-                                          <User className="h-3.5 w-3.5 text-blue-600" />
+                                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                                          <User className="h-3.5 w-3.5 text-purple-600" />
                                         </div>
-                                        <div className="flex-1">
-                                          <div className="font-semibold text-gray-900 text-sm">{appointment.adviser_name}</div>
-                                          <Badge variant="outline" className="text-xs px-1.5 py-0.5 font-semibold bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 border-blue-300">
-                                            ADVISER
-                                          </Badge>
-                                        </div>
+                                        <div className="font-semibold text-gray-900 text-sm">{appointment.adviser_name}</div>
                                       </div>
                                     </div>
                                   ) : (
-                                    <div className="flex items-center gap-2 text-gray-400 text-sm">
-                                      <User className="h-4 w-4" />
-                                      <span>Not specified</span>
+                                    <div className="bg-gray-100 rounded-lg p-3 border border-gray-200">
+                                      <p className="text-xs text-gray-500 italic">No adviser assigned</p>
                                     </div>
                                   )}
                                 </div>
                                 {/* Panelists */}
-                                <div className="md:col-span-2">
+                                <div>
                                   <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Panelists</p>
                                   {appointment.status === "APPROVED" && appointment.group_code && appointmentsPanelists[appointment.group_code] ? (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                    <div className="space-y-2">
                                       {appointmentsPanelists[appointment.group_code].map((panelist: any) => (
                                         <div key={panelist.id} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-gray-200 shadow-sm">
                                           <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
