@@ -83,9 +83,9 @@ function Navigation() {
               SCHEDULE
             </Link>
             <Link 
-              href="/auth/panel-login" 
+              href="/panel-schedules" 
               className={`font-medium transition-colors ${
-                isActive("/auth/panel-login") 
+                isActive("/panel-schedules") 
                   ? "text-orange-600" 
                   : "text-gray-600 hover:text-gray-900"
               }`}
