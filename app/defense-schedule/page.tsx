@@ -227,37 +227,6 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <Navigation />
       <main className="flex-1 pt-16">
-        {/* Hero Section */}
-        <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-orange-50 via-white to-white min-h-[calc(100vh-8rem)]">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-orange-100 to-orange-200 text-orange-700 text-sm font-medium mb-8 shadow-lg">
-                <span className="flex h-3 w-3 rounded-full bg-orange-500 animate-pulse"></span>
-                Now Scheduling 2024-2025 Academic Year
-              </div>
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-                Schedule Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-800">Defense</span>
-              </h1>
-              <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-                Streamlined appointment scheduling for Capstone and Thesis defenses. 
-                Book your slot, track your status, and focus on what matters most—your research.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                <Link href="/schedule">
-                  <Button className="px-10 py-4 text-lg font-medium bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                    Schedule Defense
-                  </Button>
-                </Link>
-                <Link href="/track">
-                  <Button variant="outline" className="px-10 py-4 text-lg font-medium border-2 border-gray-300 hover:border-orange-500 hover:bg-orange-50 rounded-xl transition-all duration-300 transform hover:scale-105">
-                    Track Appointment
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Schedule View Section */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
