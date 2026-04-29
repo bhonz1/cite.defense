@@ -25,11 +25,11 @@ const researchTypes = ["All", "CAPSTONE", "THESIS"];
 const defenseTypes = ["All", "PROPOSAL", "FINAL"];
 const statuses = ["All", "PENDING", "APPROVED", "NOT APPROVED", "COMPLETED"];
 
-function AdminNavigation({ user, onSignOut, activeTab, setActiveTab, stats }: { 
-  user: any; 
+function AdminNavigation({ user, onSignOut, activeTab, setActiveTab, stats }: {
+  user: any;
   onSignOut: () => void;
-  activeTab: 'dashboard' | 'list' | 'panelist' | 'users';
-  setActiveTab: (tab: 'dashboard' | 'list' | 'panelist' | 'users') => void;
+  activeTab: 'dashboard' | 'list' | 'panelist' | 'settings' | 'users';
+  setActiveTab: (tab: 'dashboard' | 'list' | 'panelist' | 'settings' | 'users') => void;
   stats: Stats | null;
 }) {
   const pathname = usePathname();
@@ -87,6 +87,17 @@ function AdminNavigation({ user, onSignOut, activeTab, setActiveTab, stats }: {
             >
               <Shield className="h-4 w-4" />
               panelist
+            </div>
+            <div
+              onClick={() => setActiveTab('settings')}
+              className={`flex items-center gap-2 font-medium transition-colors cursor-pointer ${
+                activeTab === 'settings'
+                  ? "text-orange-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              <BookOpen className="h-4 w-4" />
+              settings
             </div>
             <div
               onClick={() => setActiveTab('users')}
@@ -154,7 +165,7 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [selectedView, setSelectedView] = useState<'all' | 'pending' | 'approved' | 'not-approved' | 'completed'>('pending');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'list' | 'panelist' | 'users'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'list' | 'panelist' | 'settings' | 'users'>('dashboard');
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     status: "PENDING",
@@ -181,6 +192,27 @@ export default function AdminDashboard() {
   const [availablePanelists, setAvailablePanelists] = useState<any[]>([]);
   const [panelistStats, setPanelistStats] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [settingsTab, setSettingsTab] = useState<'academic-year' | 'dates' | 'rooms' | 'time-slots'>('academic-year');
+  const [activeAcademicYear, setActiveAcademicYear] = useState<string>('');
+  const [availableDates, setAvailableDates] = useState<any[]>([]);
+  const [availableRooms, setAvailableRooms] = useState<any[]>([]);
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<any[]>([]);
+  const [academicYears, setAcademicYears] = useState<any[]>([]);
+  const [isAcadYearDialogOpen, setIsAcadYearDialogOpen] = useState(false);
+  const [editingAcadYear, setEditingAcadYear] = useState<any>(null);
+  const [newAcadYear, setNewAcadYear] = useState({ acad_year: '', acad_desc: '', status: 'active' });
+  const [availableDatesList, setAvailableDatesList] = useState<any[]>([]);
+  const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
+  const [editingDate, setEditingDate] = useState<any>(null);
+  const [newDate, setNewDate] = useState({ research_type: '', defense_type: '', date: '', status: 'activate' });
+  const [availableRoomsList, setAvailableRoomsList] = useState<any[]>([]);
+  const [isRoomDialogOpen, setIsRoomDialogOpen] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<any>(null);
+  const [newRoom, setNewRoom] = useState({ room_code: '', room_name: '', available: true });
+  const [availableTimeSlotsList, setAvailableTimeSlotsList] = useState<any[]>([]);
+  const [isTimeSlotDialogOpen, setIsTimeSlotDialogOpen] = useState(false);
+  const [editingTimeSlot, setEditingTimeSlot] = useState<any>(null);
+  const [newTimeSlot, setNewTimeSlot] = useState({ time_slot: '', status: 'active' });
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -283,6 +315,326 @@ export default function AdminDashboard() {
       fetchPanelistStats();
     }
   }, [activeTab, user]);
+
+  const fetchAcademicYears = async () => {
+    try {
+      const response = await fetch('/api/academic-years');
+      if (response.ok) {
+        const data = await response.json();
+        setAcademicYears(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch academic years:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'settings' && settingsTab === 'academic-year') {
+      fetchAcademicYears();
+    }
+  }, [activeTab, settingsTab]);
+
+  const fetchAvailableDatesList = async () => {
+    try {
+      const response = await fetch('/api/available-dates');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableDatesList(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch available dates:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'settings' && settingsTab === 'dates') {
+      fetchAvailableDatesList();
+    }
+  }, [activeTab, settingsTab]);
+
+  const fetchAvailableRoomsList = async () => {
+    try {
+      const response = await fetch('/api/available-rooms');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableRoomsList(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch available rooms:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'settings' && settingsTab === 'rooms') {
+      fetchAvailableRoomsList();
+    }
+  }, [activeTab, settingsTab]);
+
+  const fetchAvailableTimeSlotsList = async () => {
+    try {
+      const response = await fetch('/api/available-time-slots');
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableTimeSlotsList(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch available time slots:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'settings' && settingsTab === 'time-slots') {
+      fetchAvailableTimeSlotsList();
+    }
+  }, [activeTab, settingsTab]);
+
+  const handleAddTimeSlot = () => {
+    setEditingTimeSlot(null);
+    setNewTimeSlot({ time_slot: '', status: 'active' });
+    setIsTimeSlotDialogOpen(true);
+  };
+
+  const handleEditTimeSlot = (timeSlotItem: any) => {
+    setEditingTimeSlot(timeSlotItem);
+    setNewTimeSlot({ time_slot: timeSlotItem.time_slot, status: timeSlotItem.status });
+    setIsTimeSlotDialogOpen(true);
+  };
+
+  const handleDeleteTimeSlot = async (id: string) => {
+    try {
+      const response = await fetch(`/api/available-time-slots/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        toast.success('Available time slot deleted successfully');
+        fetchAvailableTimeSlotsList();
+      } else {
+        toast.error('Failed to delete available time slot');
+      }
+    } catch (error) {
+      toast.error('Failed to delete available time slot');
+    }
+  };
+
+  const handleSaveTimeSlot = async () => {
+    try {
+      if (editingTimeSlot) {
+        const response = await fetch(`/api/available-time-slots/${editingTimeSlot.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newTimeSlot),
+        });
+        if (response.ok) {
+          toast.success('Available time slot updated successfully');
+          fetchAvailableTimeSlotsList();
+          setIsTimeSlotDialogOpen(false);
+        } else {
+          toast.error('Failed to update available time slot');
+        }
+      } else {
+        const response = await fetch('/api/available-time-slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newTimeSlot),
+        });
+        if (response.ok) {
+          toast.success('Available time slot added successfully');
+          fetchAvailableTimeSlotsList();
+          setIsTimeSlotDialogOpen(false);
+        } else {
+          toast.error('Failed to add available time slot');
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to save available time slot');
+    }
+  };
+
+  const handleAddRoom = () => {
+    setEditingRoom(null);
+    setNewRoom({ room_code: '', room_name: '', available: true });
+    setIsRoomDialogOpen(true);
+  };
+
+  const handleEditRoom = (roomItem: any) => {
+    setEditingRoom(roomItem);
+    setNewRoom({ room_code: roomItem.room_code, room_name: roomItem.room_name, available: roomItem.available });
+    setIsRoomDialogOpen(true);
+  };
+
+  const handleDeleteRoom = async (id: string) => {
+    try {
+      const response = await fetch(`/api/available-rooms/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        toast.success('Available room deleted successfully');
+        fetchAvailableRoomsList();
+      } else {
+        toast.error('Failed to delete available room');
+      }
+    } catch (error) {
+      toast.error('Failed to delete available room');
+    }
+  };
+
+  const handleSaveRoom = async () => {
+    try {
+      if (editingRoom) {
+        const response = await fetch(`/api/available-rooms/${editingRoom.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRoom),
+        });
+        if (response.ok) {
+          toast.success('Available room updated successfully');
+          fetchAvailableRoomsList();
+          setIsRoomDialogOpen(false);
+        } else {
+          toast.error('Failed to update available room');
+        }
+      } else {
+        const response = await fetch('/api/available-rooms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newRoom),
+        });
+        if (response.ok) {
+          toast.success('Available room added successfully');
+          fetchAvailableRoomsList();
+          setIsRoomDialogOpen(false);
+        } else {
+          toast.error('Failed to add available room');
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to save available room');
+    }
+  };
+
+  const handleAddDate = () => {
+    setEditingDate(null);
+    setNewDate({ research_type: '', defense_type: '', date: '', status: 'activate' });
+    setIsDateDialogOpen(true);
+  };
+
+  const handleEditDate = (dateItem: any) => {
+    setEditingDate(dateItem);
+    setNewDate({ research_type: dateItem.research_type, defense_type: dateItem.defense_type, date: dateItem.date, status: dateItem.status });
+    setIsDateDialogOpen(true);
+  };
+
+  const handleDeleteDate = async (id: string) => {
+    try {
+      const response = await fetch(`/api/available-dates/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        toast.success('Available date deleted successfully');
+        fetchAvailableDatesList();
+      } else {
+        toast.error('Failed to delete available date');
+      }
+    } catch (error) {
+      toast.error('Failed to delete available date');
+    }
+  };
+
+  const handleSaveDate = async () => {
+    try {
+      if (editingDate) {
+        const response = await fetch(`/api/available-dates/${editingDate.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newDate),
+        });
+        if (response.ok) {
+          toast.success('Available date updated successfully');
+          fetchAvailableDatesList();
+          setIsDateDialogOpen(false);
+        } else {
+          toast.error('Failed to update available date');
+        }
+      } else {
+        const response = await fetch('/api/available-dates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newDate),
+        });
+        if (response.ok) {
+          toast.success('Available date added successfully');
+          fetchAvailableDatesList();
+          setIsDateDialogOpen(false);
+        } else {
+          toast.error('Failed to add available date');
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to save available date');
+    }
+  };
+
+  const handleAddAcadYear = () => {
+    setEditingAcadYear(null);
+    setNewAcadYear({ acad_year: '', acad_desc: '', status: 'active' });
+    setIsAcadYearDialogOpen(true);
+  };
+
+  const handleEditAcadYear = (acadYear: any) => {
+    setEditingAcadYear(acadYear);
+    setNewAcadYear({ acad_year: acadYear.acad_year, acad_desc: acadYear.acad_desc, status: acadYear.status });
+    setIsAcadYearDialogOpen(true);
+  };
+
+  const handleDeleteAcadYear = async (id: string) => {
+    try {
+      const response = await fetch(`/api/academic-years/${id}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        toast.success('Academic year deleted successfully');
+        fetchAcademicYears();
+      } else {
+        toast.error('Failed to delete academic year');
+      }
+    } catch (error) {
+      toast.error('Failed to delete academic year');
+    }
+  };
+
+  const handleSaveAcadYear = async () => {
+    try {
+      if (editingAcadYear) {
+        const response = await fetch(`/api/academic-years/${editingAcadYear.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newAcadYear),
+        });
+        if (response.ok) {
+          toast.success('Academic year updated successfully');
+          fetchAcademicYears();
+          setIsAcadYearDialogOpen(false);
+        } else {
+          toast.error('Failed to update academic year');
+        }
+      } else {
+        const response = await fetch('/api/academic-years', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newAcadYear),
+        });
+        if (response.ok) {
+          toast.success('Academic year added successfully');
+          fetchAcademicYears();
+          setIsAcadYearDialogOpen(false);
+        } else {
+          toast.error('Failed to add academic year');
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to save academic year');
+    }
+  };
 
   useEffect(() => {
     const filterAvailablePanelists = async () => {
@@ -1148,7 +1500,375 @@ export default function AdminDashboard() {
           </>
         )}
 
-                    
+        {/* Settings View */}
+        {activeTab === "settings" && (
+          <>
+            <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-md overflow-hidden">
+              <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 p-6 shadow-lg">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <BookOpen className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Settings</h3>
+                    <p className="text-white/80 text-sm">Configure system settings and preferences</p>
+                  </div>
+                </div>
+              </div>
+              <CardContent className="p-6">
+                {/* Settings Tabs */}
+                <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
+                  <Button
+                    variant={settingsTab === 'academic-year' ? 'default' : 'outline'}
+                    onClick={() => setSettingsTab('academic-year')}
+                    className={settingsTab === 'academic-year'
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0'
+                      : 'border-orange-300 text-orange-700 hover:bg-orange-50'
+                    }
+                  >
+                    Active Academic Year
+                  </Button>
+                  <Button
+                    variant={settingsTab === 'dates' ? 'default' : 'outline'}
+                    onClick={() => setSettingsTab('dates')}
+                    className={settingsTab === 'dates'
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0'
+                      : 'border-orange-300 text-orange-700 hover:bg-orange-50'
+                    }
+                  >
+                    Available Dates
+                  </Button>
+                  <Button
+                    variant={settingsTab === 'rooms' ? 'default' : 'outline'}
+                    onClick={() => setSettingsTab('rooms')}
+                    className={settingsTab === 'rooms'
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0'
+                      : 'border-orange-300 text-orange-700 hover:bg-orange-50'
+                    }
+                  >
+                    Available Rooms
+                  </Button>
+                  <Button
+                    variant={settingsTab === 'time-slots' ? 'default' : 'outline'}
+                    onClick={() => setSettingsTab('time-slots')}
+                    className={settingsTab === 'time-slots'
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-0'
+                      : 'border-orange-300 text-orange-700 hover:bg-orange-50'
+                    }
+                  >
+                    Available Time Slots
+                  </Button>
+                </div>
+
+                {/* Tab Content */}
+                {settingsTab === 'academic-year' && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-lg font-bold text-gray-900">Academic Years</h4>
+                      <Button
+                        className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
+                        onClick={handleAddAcadYear}
+                      >
+                        <BookOpen className="h-4 w-4 mr-2" />
+                        Add Academic Year
+                      </Button>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-200">
+                          <TableRow>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">ID</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Academic Year</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Description</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Status</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {academicYears.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                No academic years found
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            academicYears.map((acadYear: any) => (
+                              <TableRow key={acadYear.id} className="hover:bg-gray-50">
+                                <TableCell className="py-3 px-4 text-sm text-gray-900">{acadYear.id}</TableCell>
+                                <TableCell className="py-3 px-4 text-sm font-semibold text-gray-900">{acadYear.acad_year}</TableCell>
+                                <TableCell className="py-3 px-4 text-sm text-gray-600">{acadYear.acad_desc || '-'}</TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <Badge className={`font-semibold ${
+                                    acadYear.status === 'active'
+                                      ? 'bg-green-100 text-green-700 border-green-200'
+                                      : 'bg-gray-100 text-gray-700 border-gray-200'
+                                  }`}>
+                                    {acadYear.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEditAcadYear(acadYear)}
+                                      className="h-8 px-3 text-xs"
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDeleteAcadYear(acadYear.id)}
+                                      className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'dates' && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-lg font-bold text-gray-900">Available Dates</h4>
+                      <Button
+                        className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
+                        onClick={handleAddDate}
+                      >
+                        <CalendarDays className="h-4 w-4 mr-2" />
+                        Add Available Date
+                      </Button>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b-2 border-green-200">
+                          <TableRow>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">ID</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Research Type</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Defense Type</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Date</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Status</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {availableDatesList.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                                No available dates found
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            availableDatesList.map((dateItem: any) => (
+                              <TableRow key={dateItem.id} className="hover:bg-gray-50">
+                                <TableCell className="py-3 px-4 text-sm text-gray-900">{dateItem.id}</TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <Badge className={`font-semibold ${
+                                    dateItem.research_type === 'THESIS'
+                                      ? 'bg-blue-100 text-blue-700 border-blue-200'
+                                      : 'bg-purple-100 text-purple-700 border-purple-200'
+                                  }`}>
+                                    {dateItem.research_type}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-3 px-4 text-sm text-gray-600">{dateItem.defense_type}</TableCell>
+                                <TableCell className="py-3 px-4 text-sm text-gray-900">{dateItem.date}</TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <Badge className={`font-semibold ${
+                                    dateItem.status === 'activate'
+                                      ? 'bg-green-100 text-green-700 border-green-200'
+                                      : 'bg-gray-100 text-gray-700 border-gray-200'
+                                  }`}>
+                                    {dateItem.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEditDate(dateItem)}
+                                      className="h-8 px-3 text-xs"
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDeleteDate(dateItem.id)}
+                                      className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'rooms' && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-lg font-bold text-gray-900">Available Rooms</h4>
+                      <Button
+                        className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
+                        onClick={handleAddRoom}
+                      >
+                        <MapPin className="h-4 w-4 mr-2" />
+                        Add Available Room
+                      </Button>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gradient-to-r from-purple-50 to-pink-50 border-b-2 border-purple-200">
+                          <TableRow>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">ID</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Room Code</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Room Name</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Available</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {availableRoomsList.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                                No available rooms found
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            availableRoomsList.map((roomItem: any) => (
+                              <TableRow key={roomItem.id} className="hover:bg-gray-50">
+                                <TableCell className="py-3 px-4 text-sm text-gray-900">{roomItem.id}</TableCell>
+                                <TableCell className="py-3 px-4 text-sm font-semibold text-gray-900">{roomItem.room_code}</TableCell>
+                                <TableCell className="py-3 px-4 text-sm text-gray-600">{roomItem.room_name}</TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <Badge className={`font-semibold ${
+                                    roomItem.available
+                                      ? 'bg-green-100 text-green-700 border-green-200'
+                                      : 'bg-gray-100 text-gray-700 border-gray-200'
+                                  }`}>
+                                    {roomItem.available ? 'TRUE' : 'FALSE'}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEditRoom(roomItem)}
+                                      className="h-8 px-3 text-xs"
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDeleteRoom(roomItem.id)}
+                                      className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+
+                {settingsTab === 'time-slots' && (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <h4 className="text-lg font-bold text-gray-900">Available Time Slots</h4>
+                      <Button
+                        className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
+                        onClick={handleAddTimeSlot}
+                      >
+                        <Clock className="h-4 w-4 mr-2" />
+                        Add Time Slot
+                      </Button>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader className="bg-gradient-to-r from-orange-50 to-yellow-50 border-b-2 border-orange-200">
+                          <TableRow>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">ID</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Time Slot</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Status</TableHead>
+                            <TableHead className="font-bold text-gray-800 text-xs uppercase tracking-wider py-3 px-4">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {availableTimeSlotsList.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                                No available time slots found
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            availableTimeSlotsList.map((timeSlotItem: any) => (
+                              <TableRow key={timeSlotItem.id} className="hover:bg-gray-50">
+                                <TableCell className="py-3 px-4 text-sm text-gray-900">{timeSlotItem.id}</TableCell>
+                                <TableCell className="py-3 px-4 text-sm font-semibold text-gray-900">{timeSlotItem.time_slot}</TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <Badge className={`font-semibold ${
+                                    timeSlotItem.status === 'active'
+                                      ? 'bg-green-100 text-green-700 border-green-200'
+                                      : 'bg-gray-100 text-gray-700 border-gray-200'
+                                  }`}>
+                                    {timeSlotItem.status}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="py-3 px-4">
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleEditTimeSlot(timeSlotItem)}
+                                      className="h-8 px-3 text-xs"
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDeleteTimeSlot(timeSlotItem.id)}
+                                      className="h-8 px-3 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                    >
+                                      Delete
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        )}
+
         {/* List View */}
         {activeTab === "list" && (
           <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-md overflow-hidden">
@@ -2264,6 +2984,308 @@ export default function AdminDashboard() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Academic Year Dialog */}
+        <Dialog open={isAcadYearDialogOpen} onOpenChange={setIsAcadYearDialogOpen}>
+          <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 rounded-t-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl font-bold text-white m-0">
+                    {editingAcadYear ? 'Edit Academic Year' : 'Add Academic Year'}
+                  </DialogTitle>
+                  <DialogDescription className="text-white/80 text-sm m-0">
+                    {editingAcadYear ? 'Update academic year information' : 'Create a new academic year'}
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="acadYear" className="text-sm font-semibold text-gray-700">Academic Year</Label>
+                <Input
+                  id="acadYear"
+                  placeholder="e.g., 2024-2025"
+                  value={newAcadYear.acad_year}
+                  onChange={(e) => setNewAcadYear({ ...newAcadYear, acad_year: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="acadDesc" className="text-sm font-semibold text-gray-700">Description</Label>
+                <Input
+                  id="acadDesc"
+                  placeholder="e.g., School Year 2024-2025"
+                  value={newAcadYear.acad_desc}
+                  onChange={(e) => setNewAcadYear({ ...newAcadYear, acad_desc: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status" className="text-sm font-semibold text-gray-700">Status</Label>
+                <Select
+                  value={newAcadYear.status}
+                  onValueChange={(value) => setNewAcadYear({ ...newAcadYear, status: value || 'active' })}
+                >
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="px-6 pb-6">
+              <Button
+                variant="outline"
+                className="flex-1 h-11 border-gray-300 hover:bg-gray-50"
+                onClick={() => setIsAcadYearDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 h-11 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                onClick={handleSaveAcadYear}
+              >
+                {editingAcadYear ? 'Update' : 'Add'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Available Date Dialog */}
+        <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
+          <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 rounded-t-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <CalendarDays className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl font-bold text-white m-0">
+                    {editingDate ? 'Edit Available Date' : 'Add Available Date'}
+                  </DialogTitle>
+                  <DialogDescription className="text-white/80 text-sm m-0">
+                    {editingDate ? 'Update available date information' : 'Create a new available date'}
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="researchType" className="text-sm font-semibold text-gray-700">Research Type</Label>
+                <Select
+                  value={newDate.research_type}
+                  onValueChange={(value) => setNewDate({ ...newDate, research_type: value || '' })}
+                >
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <SelectValue placeholder="Select research type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CAPSTONE">Capstone</SelectItem>
+                    <SelectItem value="THESIS">Thesis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="defenseType" className="text-sm font-semibold text-gray-700">Defense Type</Label>
+                <Select
+                  value={newDate.defense_type}
+                  onValueChange={(value) => setNewDate({ ...newDate, defense_type: value || '' })}
+                >
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <SelectValue placeholder="Select defense type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PROPOSAL">Proposal</SelectItem>
+                    <SelectItem value="FINAL">Final</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="date" className="text-sm font-semibold text-gray-700">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={newDate.date}
+                  onChange={(e) => setNewDate({ ...newDate, date: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status" className="text-sm font-semibold text-gray-700">Status</Label>
+                <Select
+                  value={newDate.status}
+                  onValueChange={(value) => setNewDate({ ...newDate, status: value || 'activate' })}
+                >
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="activate">Activate</SelectItem>
+                    <SelectItem value="deactivate">Deactivate</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="px-6 pb-6">
+              <Button
+                variant="outline"
+                className="flex-1 h-11 border-gray-300 hover:bg-gray-50"
+                onClick={() => setIsDateDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 h-11 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                onClick={handleSaveDate}
+              >
+                {editingDate ? 'Update' : 'Add'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Available Room Dialog */}
+        <Dialog open={isRoomDialogOpen} onOpenChange={setIsRoomDialogOpen}>
+          <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 rounded-t-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <MapPin className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl font-bold text-white m-0">
+                    {editingRoom ? 'Edit Available Room' : 'Add Available Room'}
+                  </DialogTitle>
+                  <DialogDescription className="text-white/80 text-sm m-0">
+                    {editingRoom ? 'Update available room information' : 'Create a new available room'}
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="roomCode" className="text-sm font-semibold text-gray-700">Room Code</Label>
+                <Input
+                  id="roomCode"
+                  placeholder="e.g., RM-101"
+                  value={newRoom.room_code}
+                  onChange={(e) => setNewRoom({ ...newRoom, room_code: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="roomName" className="text-sm font-semibold text-gray-700">Room Name</Label>
+                <Input
+                  id="roomName"
+                  placeholder="e.g., Computer Laboratory 1"
+                  value={newRoom.room_name}
+                  onChange={(e) => setNewRoom({ ...newRoom, room_name: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="available" className="text-sm font-semibold text-gray-700">Available</Label>
+                <Select
+                  value={newRoom.available ? 'true' : 'false'}
+                  onValueChange={(value) => setNewRoom({ ...newRoom, available: value === 'true' })}
+                >
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <SelectValue placeholder="Select availability" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">TRUE</SelectItem>
+                    <SelectItem value="false">FALSE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="px-6 pb-6">
+              <Button
+                variant="outline"
+                className="flex-1 h-11 border-gray-300 hover:bg-gray-50"
+                onClick={() => setIsRoomDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 h-11 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                onClick={handleSaveRoom}
+              >
+                {editingRoom ? 'Update' : 'Add'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Available Time Slot Dialog */}
+        <Dialog open={isTimeSlotDialogOpen} onOpenChange={setIsTimeSlotDialogOpen}>
+          <DialogContent className="max-w-full sm:max-w-sm md:max-w-md">
+            <div className="bg-gradient-to-br from-orange-500 to-red-600 p-6 rounded-t-lg">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Clock className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <DialogTitle className="text-2xl font-bold text-white m-0">
+                    {editingTimeSlot ? 'Edit Time Slot' : 'Add Time Slot'}
+                  </DialogTitle>
+                  <DialogDescription className="text-white/80 text-sm m-0">
+                    {editingTimeSlot ? 'Update time slot information' : 'Create a new time slot'}
+                  </DialogDescription>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="timeSlot" className="text-sm font-semibold text-gray-700">Time Slot</Label>
+                <Input
+                  id="timeSlot"
+                  placeholder="e.g., 8:00 AM - 10:00 AM"
+                  value={newTimeSlot.time_slot}
+                  onChange={(e) => setNewTimeSlot({ ...newTimeSlot, time_slot: e.target.value })}
+                  className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status" className="text-sm font-semibold text-gray-700">Status</Label>
+                <Select
+                  value={newTimeSlot.status}
+                  onValueChange={(value) => setNewTimeSlot({ ...newTimeSlot, status: value || 'active' })}
+                >
+                  <SelectTrigger className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="px-6 pb-6">
+              <Button
+                variant="outline"
+                className="flex-1 h-11 border-gray-300 hover:bg-gray-50"
+                onClick={() => setIsTimeSlotDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 h-11 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-semibold shadow-md hover:shadow-lg transition-all"
+                onClick={handleSaveTimeSlot}
+              >
+                {editingTimeSlot ? 'Update' : 'Add'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
