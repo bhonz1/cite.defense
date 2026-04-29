@@ -2238,7 +2238,7 @@ export default function AdminDashboard() {
                                         disabled={!panelists.chairman || !panelists.member1 || !panelists.member2}
                                         onClick={() => {
                                           if (panelists.chairman && panelists.member1 && panelists.member2) {
-                                            handleApproveWithPanelists(selectedAppointment?.id || '');
+                                            handleApproveWithPanelists(selectedAppointment?.group_code || '');
                                             setIsApproveDialogOpen(false);
                                           }
                                         }}
