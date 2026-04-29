@@ -4,9 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
     const body = await request.json();
@@ -15,7 +16,7 @@ export async function PUT(
     const { data, error } = await supabase
       .from('available_dates')
       .update({ research_type, defense_type, date, status })
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -29,16 +30,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
     const { error } = await supabase
       .from('available_dates')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) throw error;
     return NextResponse.json({ success: true });
